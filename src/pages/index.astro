@@ -1,5 +1,13 @@
 ---
+import { render, getCollection } from "astro:content";
+import Schedule from "../components/Schedule.astro";
+import Timeslot from "../components/Timeslot.astro";
 
+const days = await getCollection('days')
+const latest = days.sort(
+	(a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+)[0];
+const { Content } = await render(latest)
 ---
 
 <html lang="en">
@@ -9,9 +17,13 @@
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>Eliot Newsletter</title>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<h1>Eliot Newsletter</h1>
+		<main>
+			<h2>{latest.data.date}</h2>
+			<Content components={{ Schedule, Timeslot }} />
+		</main>
 	</body>
 </html>

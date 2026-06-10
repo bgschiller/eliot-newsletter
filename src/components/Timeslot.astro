@@ -1,0 +1,9 @@
+---
+const { start, bold = false } = Astro.props;
+---
+<div class:list={["timeslot", { bold }]}>
+  <div class="time">{start}</div>
+  <div class="events">
+    <slot />
+  </div>
+</div>
