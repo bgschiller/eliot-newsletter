@@ -1,0 +1,332 @@
+/* ============================================
+   Eliot Newsletter — Design System
+   Aesthetic: Editorial Camp Newsletter
+   ============================================ */
+
+/* --- Google Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap');
+
+/* --- CSS Variables --- */
+:root {
+  /* Typography */
+  --font-display: 'UnifrakturMaguntia', 'Old English Text MT', 'Blackletter', serif;
+  --font-body: Georgia, 'Times New Roman', serif;
+
+  /* Colors */
+  --color-bg: #FDF8F0;
+  --color-text: #1a1a1a;
+  --color-muted: #6B6B6B;
+  --color-accent: #2D5016;
+  --color-accent-light: #8B9A6B;
+  --color-border: #D4CFC4;
+  --color-schedule-bg: #FFFDF7;
+}
+
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 2rem;
+}
+
+/* --- Paper texture (screen only) --- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+/* --- Typography --- */
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 2.75rem);
+  font-weight: normal;
+  line-height: 1.05;
+  color: var(--color-accent);
+  margin-bottom: 0.15em;
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--color-muted);
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-border);
+}
+
+h2 {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  font-weight: bold;
+  line-height: 1.2;
+  margin-top: 1.25rem;
+  margin-bottom: 0.3rem;
+  color: var(--color-accent);
+}
+
+/* --- Links --- */
+a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+a:hover { color: var(--color-accent-light); }
+
+/* ============================================
+   PAGE LAYOUT (Screen)
+   ============================================ */
+
+.page-layout {
+  /* On mobile (< 768px), natural flow: schedule first, then articles */
+}
+
+.page-layout h2 { break-after: avoid; }
+
+/* --- Schedule — Screen Default (mobile: full-width card at top) --- */
+.schedule {
+  background: var(--color-schedule-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 1rem 1.125rem;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Schedule: desktop — float right as a sidebar --- */
+@media screen and (min-width: 48rem) {
+  .schedule {
+    float: right;
+    width: 17rem;
+    margin-left: 1.75rem;
+    margin-bottom: 1rem;
+    background: var(--color-schedule-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 1rem 1.125rem;
+  }
+}
+
+/* --- Schedule Component Internals --- */
+.schedule h2 {
+  margin-top: 0.9rem;
+  margin-bottom: 0.35rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 1.0625rem;
+}
+.schedule h2:first-child { margin-top: 0; }
+
+.timeslot {
+  display: grid;
+  grid-template-columns: 3.2em 1fr;
+  gap: 0.35rem;
+  padding: 0.1rem 0;
+  font-size: 0.85rem;
+  align-items: baseline;
+}
+.time {
+  text-align: right;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.timeslot.bold .time {
+  font-weight: bold;
+  color: var(--color-text);
+}
+.timeslot.bold .events > :first-child {
+  font-weight: bold;
+}
+
+.events { list-style: none; padding: 0; }
+.events li { margin-bottom: 0.05rem; }
+.events li:last-child { margin-bottom: 0; }
+.events p { display: inline; }
+
+/* --- Article Body --- */
+.articles p, main > p {
+  margin-bottom: 0.55em;
+}
+em { font-style: italic; }
+strong { font-weight: bold; }
+
+/* Author credits: em-dash + italic name */
+main > p > em {
+  font-style: italic;
+}
+
+/* Standalone credit: paragraph that is just em-dash + em */
+main > p.credit {
+  margin-top: 0.1em;
+  margin-bottom: 0.8em;
+  color: var(--color-muted);
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+/* --- Page Footer (visible in print only) --- */
+.page-footer {
+  display: none;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+  @page {
+    size: 8.5in 14in;
+    margin: 0.55in;
+  }
+
+  html { font-size: 100%; }
+  body {
+    max-width: none;
+    padding: 0;
+    background: white;
+    color: black;
+  }
+  body::before { display: none; }
+
+  /* Title: blackletter, large, black */
+  h1 {
+    font-size: 42pt;
+    color: black;
+    margin-bottom: 3pt;
+    line-height: 1;
+  }
+
+  /* Date line */
+  .page-subtitle {
+    font-size: 11pt;
+    font-style: normal;
+    color: black;
+    margin-bottom: 14pt;
+    padding-bottom: 6pt;
+    border-bottom: 1.5pt solid black;
+  }
+
+  /* Schedule: float right so it occupies the right column on page 1 */
+  .schedule {
+    float: right;
+    width: var(--print-schedule-w, 45%);
+    margin-left: 5%;
+    margin-bottom: 10pt;
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .schedule h2 {
+    font-size: var(--print-heading-size, 16pt);
+    font-weight: bold;
+    color: black;
+    margin-top: 7pt;
+    margin-bottom: 2pt;
+    border-bottom: 0.75pt solid black;
+    padding-bottom: 2pt;
+    break-after: avoid;
+  }
+  .schedule h2:first-child { margin-top: 0; }
+
+  .timeslot {
+    display: grid;
+    grid-template-columns: 2.4em 1fr;
+    gap: 3pt;
+    padding: 0;
+    font-size: var(--print-schedule-size, 10pt);
+    orphans: 2;
+    widows: 2;
+  }
+
+  .time { text-align: right; color: black; }
+  .timeslot.bold .time { font-weight: bold; color: black; }
+  .timeslot.bold .events > :first-child { font-weight: bold; }
+
+  /* Article headings */
+  .articles h2, .page-layout > h2, main > h2 {
+    font-size: var(--print-heading-size, 16pt);
+    font-weight: bold;
+    color: black;
+    margin-top: 10pt;
+    margin-bottom: 3pt;
+    break-after: avoid;
+  }
+  .articles h2:first-child, .page-layout > h2:first-of-type, main > h2:first-of-type {
+    margin-top: 0;
+  }
+
+  /* Body text */
+  .articles p, .page-layout > p, main > p {
+    font-size: var(--print-body-size, 11pt);
+    margin-bottom: 0;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Author credits */
+  .articles p.credit, main > p.credit {
+    color: black;
+    font-size: 10pt;
+    font-style: italic;
+    margin-top: 0;
+    margin-bottom: 6pt;
+  }
+
+  /* Two-column layout for articles on page 2.
+     column-width: 270pt means the container stays single-column when
+     narrower than ~540pt (beside schedule on page 1), but splits into
+     2 columns when full-width (page 2, ~533pt → 2 × ~253pt columns) */
+  .articles {
+    column-width: 250pt;
+    column-gap: 5%;
+  }
+
+  /* Hide URL printing */
+  a[href]::after { content: none !important; }
+
+  /* Page footer */
+  .page-footer {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-size: 8pt;
+    text-align: center;
+    padding: 3pt 0;
+    color: #666;
+    border-top: 0.5pt solid #ccc;
+  }
+}
+
+/* --- Motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

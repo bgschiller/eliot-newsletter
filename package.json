@@ -9,10 +9,19 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "measure": "tsx scripts/measure-print.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^6.0.3",
-    "astro": "^6.4.4"
+    "@chenglou/pretext": "^0.0.8",
+    "astro": "^6.4.4",
+    "canvas": "^3.2.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["canvas"]
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
   }
 }
