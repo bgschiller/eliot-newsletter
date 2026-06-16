@@ -181,6 +181,11 @@ a:hover { color: var(--color-accent-light); }
 .events li:last-child { margin-bottom: 0; }
 .events p { display: inline; }
 
+/* Past events: subtly greyed out (screen only) */
+.timeslot.past {
+  opacity: 0.45;
+}
+
 /* --- Article Body --- */
 .articles-front p,
 .articles-back p,
@@ -245,6 +250,12 @@ main > p.credit {
     border-bottom: 1.5pt solid black;
   }
 
+  /* Hide web-only navigation */
+  .prior-issues,
+  .back-link {
+    display: none;
+  }
+
   /* Schedule: floats right on page 2 at full sheet height.
      .articles-front has break-after: page so schedule always
      lands at the top of page 2. */
@@ -284,6 +295,11 @@ main > p.credit {
   .time { text-align: right; color: black; }
   .timeslot.bold .time { font-weight: bold; color: black; }
   .timeslot.bold .events > :first-child { font-weight: bold; }
+
+  /* Don't grey out events in print */
+  .timeslot.past {
+    opacity: 1;
+  }
 
   /* ── Articles: Page 1 (front) — two columns ── */
   .articles-front {

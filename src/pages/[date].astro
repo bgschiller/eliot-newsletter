@@ -1,0 +1,111 @@
+---
+import { render, getCollection } from "astro:content";
+import Schedule from "../components/Schedule.astro";
+import Timeslot from "../components/Timeslot.astro";
+import AuthorCredit from "../components/AuthorCredit.astro";
+
+export async function getStaticPaths() {
+  const days = await getCollection('days');
+  return days
+    .filter(d => !d.data.draft)
+    .map(d => ({
+      params: { date: d.data.date.toISOString().split('T')[0] },
+    }));
+}
+
+const { date } = Astro.params;
+
+const days = await getCollection('days');
+const day = days.find(d => {
+  const dStr = d.data.date.toISOString().split('T')[0];
+  return dStr === date;
+});
+
+if (!day) return Astro.redirect('/404');
+
+const { Content } = await render(day);
+
+const dateStr = day.data.date.toLocaleDateString('en-US', {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+const isoDate = day.data.date.toISOString().split('T')[0];
+
+// Print sizes from build-time measurement (pnpm measure)
+const { printScheduleSize, printBodySize, printHeadingSize, printPage1Articles } = day.data;
+const printCssVars = printScheduleSize ? `
+@media print {
+  :root {
+    --print-schedule-size: ${printScheduleSize}pt;
+    --print-body-size: ${printBodySize}pt;
+    --print-heading-size: ${printHeadingSize}pt;
+  }
+}` : '';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Eliot Newsletter — {dateStr}</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+    {printCssVars && <style is:inline set:html={printCssVars} />}
+  </head>
+  <body data-date={isoDate}>
+    <h1>The Eliot Compass</h1>
+    <p class="page-subtitle">{dateStr}</p>
+    <nav class="back-link">
+      <a href="/">&larr; Current Issue</a>
+    </nav>
+    <main class="page-layout" data-page1-articles={printPage1Articles ?? 0}>
+      <Content components={{ Schedule, Timeslot, AuthorCredit }} />
+    </main>
+    <footer class="page-footer">{dateStr} — Eliot Compass</footer>
+    <script>
+      // Split articles at the page-1 / page-2 boundary.
+      const main = document.querySelector('main.page-layout');
+      const schedule = main.querySelector('.schedule');
+      const page1Count = parseInt(main.dataset.page1Articles) || 0;
+
+      // Collect non-schedule siblings into a flat array
+      const children = [];
+      let sib = schedule.nextSibling;
+      while (sib) {
+        const next = sib.nextSibling;
+        children.push(sib);
+        sib = next;
+      }
+
+      // Find the split point: after the Nth <h2> heading
+      let h2Seen = 0;
+      let splitIdx = children.length;
+      for (let i = 0; i < children.length; i++) {
+        if (children[i].nodeName === 'H2') {
+          if (h2Seen === page1Count) {
+            splitIdx = i;
+            break;
+          }
+          h2Seen++;
+        }
+      }
+
+      const front = document.createElement('div');
+      front.className = 'articles-front';
+      const back = document.createElement('div');
+      back.className = 'articles-back';
+
+      for (let i = 0; i < splitIdx; i++) front.appendChild(children[i]);
+      for (let i = splitIdx; i < children.length; i++) back.appendChild(children[i]);
+
+      // Put front before schedule, back after schedule
+      main.insertBefore(front, schedule);
+      if (back.children.length > 0) main.appendChild(back);
+    </script>
+  </body>
+</html>

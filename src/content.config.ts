@@ -6,6 +6,7 @@ const days = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/days" }),
   schema: z.object({
     date: z.coerce.date(),
+    draft: z.boolean().optional().default(false),
     printScheduleSize: z.number().optional(),
     printBodySize: z.number().optional(),
     printHeadingSize: z.number().optional(),

@@ -5,10 +5,14 @@ import Timeslot from "../components/Timeslot.astro";
 import AuthorCredit from "../components/AuthorCredit.astro";
 
 const days = await getCollection('days')
-const latest = days.sort(
+const nonDraft = days.filter(d => !d.data.draft)
+const sorted = nonDraft.sort(
 	(a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-)[0];
+);
+const latest = sorted[0];
 const { Content } = await render(latest)
+
+const priorDays = sorted.slice(1);
 
 const dateStr = latest.data.date.toLocaleDateString('en-US', {
 	weekday: 'long',
@@ -16,6 +20,8 @@ const dateStr = latest.data.date.toLocaleDateString('en-US', {
 	month: 'long',
 	day: 'numeric'
 });
+
+const isoDate = latest.data.date.toISOString().split('T')[0];
 
 // Print sizes from build-time measurement (pnpm measure)
 const { printScheduleSize, printBodySize, printHeadingSize, printPage1Articles } = latest.data;
@@ -40,12 +46,29 @@ const printCssVars = printScheduleSize ? `
 		<link rel="stylesheet" href="/src/styles/global.css" />
 		{printCssVars && <style is:inline set:html={printCssVars} />}
 	</head>
-	<body>
+	<body data-date={isoDate}>
 		<h1>The Eliot Compass</h1>
 		<p class="page-subtitle">{dateStr}</p>
 		<main class="page-layout" data-page1-articles={printPage1Articles ?? 0}>
 			<Content components={{ Schedule, Timeslot, AuthorCredit }} />
 		</main>
+		{priorDays.length > 0 && (
+			<nav class="prior-issues">
+				<h2>Prior Issues</h2>
+				<ul>
+					{priorDays.map(day => {
+						const slug = day.data.date.toISOString().split('T')[0];
+						const label = day.data.date.toLocaleDateString('en-US', {
+							weekday: 'long',
+							year: 'numeric',
+							month: 'long',
+							day: 'numeric'
+						});
+						return <li><a href={`/${slug}/`}>{label}</a></li>;
+					})}
+				</ul>
+			</nav>
+		)}
 		<footer class="page-footer">{dateStr} — Eliot Compass</footer>
 		<script>
 			// Split articles at the page-1 / page-2 boundary.
@@ -89,6 +112,91 @@ const printCssVars = printScheduleSize ? `
 			// Put front before schedule, back after schedule
 			main.insertBefore(front, schedule);
 			if (back.children.length > 0) main.appendChild(back);
+		</script>
+		<script>
+			// Grey out events that have already occurred
+			(function() {
+				const pageDateStr = document.body.dataset.date;
+				if (!pageDateStr) return;
+				const pageYear = parseInt(pageDateStr.split('-')[0]);
+
+				const schedule = document.querySelector('.schedule');
+				if (!schedule) return;
+
+				const monthNames = ['January','February','March','April','May','June',
+					'July','August','September','October','November','December'];
+
+				function parseHeadingDate(h2) {
+					const text = h2.textContent.trim();
+					const match = text.match(/(\w+)\s+(\d{1,2})/);
+					if (!match) return null;
+					const monthIdx = monthNames.indexOf(match[1]);
+					if (monthIdx === -1) return null;
+					return { month: monthIdx, day: parseInt(match[2]) };
+				}
+
+				function parseTimeToMinutes(timeStr) {
+					if (timeStr === 'noon' || timeStr === 'Noon') return 12 * 60;
+					const [h, m] = timeStr.split(':').map(Number);
+					return h * 60 + m;
+				}
+
+				let currentDayDate = null;
+				let prevMinutes = null;
+				let hasSeenNoon = false;
+
+				const children = schedule.children;
+				for (let i = 0; i < children.length; i++) {
+					const el = children[i];
+
+					if (el.nodeName === 'H2') {
+						currentDayDate = parseHeadingDate(el);
+						prevMinutes = null;
+						hasSeenNoon = false;
+						continue;
+					}
+
+					if (!el.classList || !el.classList.contains('timeslot')) continue;
+					if (!currentDayDate) continue;
+
+					const timeEl = el.querySelector('.time');
+					if (!timeEl) continue;
+					const timeStr = timeEl.textContent.trim();
+					const timeMinutes = parseTimeToMinutes(timeStr);
+
+					let isPM = false;
+					let isNextDay = false;
+
+					if (timeMinutes >= 12 * 60 && timeMinutes < 13 * 60) {
+						isPM = true;
+						hasSeenNoon = true;
+					} else if (timeMinutes >= 1 * 60 && timeMinutes < 6 * 60) {
+						if (prevMinutes !== null && prevMinutes >= 23 * 60) {
+							isNextDay = true;
+						} else {
+							isPM = true;
+						}
+					} else if (timeMinutes >= 6 * 60 && timeMinutes < 12 * 60) {
+						if (hasSeenNoon) {
+							isPM = true;
+						}
+					}
+
+					let hours = Math.floor(timeMinutes / 60);
+					if (isPM && hours < 12) hours += 12;
+
+					const eventDate = new Date(pageYear, currentDayDate.month, currentDayDate.day, hours, timeMinutes % 60);
+					if (isNextDay) {
+						eventDate.setDate(eventDate.getDate() + 1);
+					}
+
+					if (eventDate.getTime() < Date.now()) {
+						el.classList.add('past');
+					}
+
+					prevMinutes = timeMinutes;
+				}
+			})();
 		</script>
 	</body>
 </html>
