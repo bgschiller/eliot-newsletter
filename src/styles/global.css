@@ -101,31 +101,46 @@ a:hover { color: var(--color-accent-light); }
    ============================================ */
 
 .page-layout {
-  /* On mobile (< 768px), natural flow: schedule first, then articles */
+  /* On mobile (< 768px), natural flow: articles, then schedule at bottom */
 }
 
 .page-layout h2 { break-after: avoid; }
 
-/* --- Schedule — Screen Default (mobile: full-width card at top) --- */
+/* --- Schedule — Screen Default (mobile: full-width card at bottom) --- */
 .schedule {
   background: var(--color-schedule-bg);
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 1rem 1.125rem;
-  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
 }
 
-/* --- Schedule: desktop — float right as a sidebar --- */
+/* --- Schedule: desktop — right sidebar via grid --- */
 @media screen and (min-width: 48rem) {
+  .page-layout {
+    display: grid;
+    grid-template-columns: 1fr 17rem;
+    gap: 1.75rem;
+    align-items: start;
+  }
+
+  .articles-front,
+  .articles-back {
+    grid-column: 1;
+  }
+
+  .articles-back {
+    grid-row: 2;
+  }
+
   .schedule {
-    float: right;
-    width: 17rem;
-    margin-left: 1.75rem;
-    margin-bottom: 1rem;
-    background: var(--color-schedule-bg);
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    padding: 1rem 1.125rem;
+    grid-column: 2;
+    grid-row: 1 / 3;
+    float: none;
+    width: auto;
+    margin-top: 0;
+    margin-left: 0;
+    margin-bottom: 0;
   }
 }
 
@@ -167,7 +182,9 @@ a:hover { color: var(--color-accent-light); }
 .events p { display: inline; }
 
 /* --- Article Body --- */
-.articles p, main > p {
+.articles-front p,
+.articles-back p,
+main > p {
   margin-bottom: 0.55em;
 }
 em { font-style: italic; }
@@ -228,7 +245,9 @@ main > p.credit {
     border-bottom: 1.5pt solid black;
   }
 
-  /* Schedule: float right so it occupies the right column on page 1 */
+  /* Schedule: floats right on page 2 at full sheet height.
+     .articles-front has break-after: page so schedule always
+     lands at the top of page 2. */
   .schedule {
     float: right;
     width: var(--print-schedule-w, 45%);
@@ -266,8 +285,22 @@ main > p.credit {
   .timeslot.bold .time { font-weight: bold; color: black; }
   .timeslot.bold .events > :first-child { font-weight: bold; }
 
+  /* ── Articles: Page 1 (front) — two columns ── */
+  .articles-front {
+    column-width: 250pt;
+    column-gap: 5%;
+    break-after: page;
+  }
+
+  /* ── Articles: Page 2 (back) — single column, wraps around schedule ── */
+  .articles-back {
+  }
+
   /* Article headings */
-  .articles h2, .page-layout > h2, main > h2 {
+  .articles-front h2,
+  .articles-back h2,
+  .page-layout > h2,
+  main > h2 {
     font-size: var(--print-heading-size, 16pt);
     font-weight: bold;
     color: black;
@@ -275,12 +308,18 @@ main > p.credit {
     margin-bottom: 3pt;
     break-after: avoid;
   }
-  .articles h2:first-child, .page-layout > h2:first-of-type, main > h2:first-of-type {
+  .articles-front h2:first-child,
+  .articles-back h2:first-child,
+  .page-layout > h2:first-of-type,
+  main > h2:first-of-type {
     margin-top: 0;
   }
 
   /* Body text */
-  .articles p, .page-layout > p, main > p {
+  .articles-front p,
+  .articles-back p,
+  .page-layout > p,
+  main > p {
     font-size: var(--print-body-size, 11pt);
     margin-bottom: 0;
     orphans: 3;
@@ -288,21 +327,14 @@ main > p.credit {
   }
 
   /* Author credits */
-  .articles p.credit, main > p.credit {
+  .articles-front p.credit,
+  .articles-back p.credit,
+  main > p.credit {
     color: black;
     font-size: 10pt;
     font-style: italic;
     margin-top: 0;
     margin-bottom: 6pt;
-  }
-
-  /* Two-column layout for articles on page 2.
-     column-width: 270pt means the container stays single-column when
-     narrower than ~540pt (beside schedule on page 1), but splits into
-     2 columns when full-width (page 2, ~533pt → 2 × ~253pt columns) */
-  .articles {
-    column-width: 250pt;
-    column-gap: 5%;
   }
 
   /* Hide URL printing */

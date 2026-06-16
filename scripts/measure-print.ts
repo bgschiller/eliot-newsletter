@@ -138,23 +138,49 @@ function measureSchedule(blocks: TimeslotBlock[]): number {
   return total;
 }
 
+function measureArticleHeight(art: Article, bodySize: number, headingSize: number): number {
+  let h = 0;
+  const hp = prepare(art.heading, font(headingSize, true));
+  h += layout(hp, ARTICLE_W_P2, headingSize * BODY_LH_RATIO).height || headingSize * BODY_LH_RATIO;
+  for (const para of art.paragraphs) {
+    const pp = prepare(para, font(bodySize));
+    h += layout(pp, ARTICLE_W_P2, bodySize * BODY_LH_RATIO).height || bodySize * BODY_LH_RATIO;
+  }
+  return h;
+}
+
 function measureArticles(articles: Article[], bodySize: number, headingSize: number): number {
   let total = 0;
   for (const art of articles) {
-    const hp = prepare(art.heading, font(headingSize, true));
-    total += layout(hp, ARTICLE_W_P2, headingSize * BODY_LH_RATIO).height || headingSize * BODY_LH_RATIO;
-    for (const para of art.paragraphs) {
-      const pp = prepare(para, font(bodySize));
-      total += layout(pp, ARTICLE_W_P2, bodySize * BODY_LH_RATIO).height || bodySize * BODY_LH_RATIO;
-    }
+    total += measureArticleHeight(art, bodySize, headingSize);
   }
   return total;
+}
+
+/**
+ * Find how many articles fit in 2 page-heights of columns (page 1).
+ * The rest overflow to page 2 (1 column next to schedule).
+ */
+function findPage1Split(
+  articles: Article[],
+  bodySize: number,
+  headingSize: number,
+): number {
+  let cumulative = 0;
+  const limit = 2 * PAGE_H;
+  for (let i = 0; i < articles.length; i++) {
+    cumulative += measureArticleHeight(articles[i], bodySize, headingSize);
+    if (cumulative > limit) {
+      return i; // articles 0..i-1 fit on page 1
+    }
+  }
+  return articles.length; // all fit on page 1
 }
 
 function computeSizes(
   schedule: TimeslotBlock[],
   articles: Article[],
-): { scheduleSize: number; bodySize: number; headingSize: number } {
+): { scheduleSize: number; bodySize: number; headingSize: number; page1Articles: number } {
   // Schedule: check if it fits at target size
   let scheduleSize = TARGET_SCHEDULE;
   const schedH = measureSchedule(schedule);
@@ -192,7 +218,9 @@ function computeSizes(
     headingSize = Math.round(bestBody * 1.45 * 10) / 10;
   }
 
-  return { scheduleSize, bodySize, headingSize };
+  const page1Articles = findPage1Split(articles, bodySize, headingSize);
+
+  return { scheduleSize, bodySize, headingSize, page1Articles };
 }
 
 // ── Frontmatter update ───────────────────────────────────────────
@@ -200,7 +228,7 @@ function computeSizes(
 function updateFrontmatter(
   filePath: string,
   raw: string,
-  sizes: { scheduleSize: number; bodySize: number; headingSize: number },
+  sizes: { scheduleSize: number; bodySize: number; headingSize: number; page1Articles: number },
 ): string {
   // The frontmatter is between --- fences
   const parts = raw.split('---');
@@ -211,6 +239,7 @@ function updateFrontmatter(
   fm = fm.replace(/^printScheduleSize:.*\n?/gm, '');
   fm = fm.replace(/^printBodySize:.*\n?/gm, '');
   fm = fm.replace(/^printHeadingSize:.*\n?/gm, '');
+  fm = fm.replace(/^printPage1Articles:.*\n?/gm, '');
   // Trim trailing whitespace
   fm = fm.trimEnd();
 
@@ -218,6 +247,7 @@ function updateFrontmatter(
   fm += `\nprintScheduleSize: ${sizes.scheduleSize}`;
   fm += `\nprintBodySize: ${sizes.bodySize}`;
   fm += `\nprintHeadingSize: ${sizes.headingSize}`;
+  fm += `\nprintPage1Articles: ${sizes.page1Articles}`;
 
   return `---${fm}\n---${parts.slice(2).join('---')}`;
 }
@@ -246,6 +276,7 @@ async function main() {
     console.log(`   Schedule: ${sizes.scheduleSize}pt (${schedule.length} blocks, ${schedule.reduce((s, b) => s + b.events.length, 0)} events)`);
     console.log(`   Body:     ${sizes.bodySize}pt (${articles.length} articles, ${articles.reduce((s, a) => s + a.paragraphs.length, 0)} paragraphs)`);
     console.log(`   Heading:  ${sizes.headingSize}pt`);
+    console.log(`   Split:    first ${sizes.page1Articles} articles → page 1, rest → page 2`);
   }
 }
 

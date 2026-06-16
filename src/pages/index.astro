@@ -18,7 +18,7 @@ const dateStr = latest.data.date.toLocaleDateString('en-US', {
 });
 
 // Print sizes from build-time measurement (pnpm measure)
-const { printScheduleSize, printBodySize, printHeadingSize } = latest.data;
+const { printScheduleSize, printBodySize, printHeadingSize, printPage1Articles } = latest.data;
 const printCssVars = printScheduleSize ? `
 @media print {
 	:root {
@@ -43,23 +43,52 @@ const printCssVars = printScheduleSize ? `
 	<body>
 		<h1>The Eliot Compass</h1>
 		<p class="page-subtitle">{dateStr}</p>
-		<main class="page-layout">
+		<main class="page-layout" data-page1-articles={printPage1Articles ?? 0}>
 			<Content components={{ Schedule, Timeslot, AuthorCredit }} />
 		</main>
 		<footer class="page-footer">{dateStr} — Eliot Compass</footer>
 		<script>
-			// Wrap article content for column-width trick (print only)
+			// Split articles at the page-1 / page-2 boundary.
+			// DOM order: .articles-front  →  .schedule  →  .articles-back
+			//   Page 1: .articles-front (2 columns, breaks after)
+			//   Page 2: .schedule (float right) + .articles-back (wraps around)
 			const main = document.querySelector('main.page-layout');
 			const schedule = main.querySelector('.schedule');
-			const wrap = document.createElement('div');
-			wrap.className = 'articles';
+			const page1Count = parseInt(main.dataset.page1Articles) || 0;
+
+			// Collect non-schedule siblings into a flat array
+			const children = [];
 			let sib = schedule.nextSibling;
 			while (sib) {
 				const next = sib.nextSibling;
-				wrap.appendChild(sib);
+				children.push(sib);
 				sib = next;
 			}
-			main.appendChild(wrap);
+
+			// Find the split point: after the Nth <h2> heading
+			let h2Seen = 0;
+			let splitIdx = children.length;
+			for (let i = 0; i < children.length; i++) {
+				if (children[i].nodeName === 'H2') {
+					if (h2Seen === page1Count) {
+						splitIdx = i;
+						break;
+					}
+					h2Seen++;
+				}
+			}
+
+			const front = document.createElement('div');
+			front.className = 'articles-front';
+			const back = document.createElement('div');
+			back.className = 'articles-back';
+
+			for (let i = 0; i < splitIdx; i++) front.appendChild(children[i]);
+			for (let i = splitIdx; i < children.length; i++) back.appendChild(children[i]);
+
+			// Put front before schedule, back after schedule
+			main.insertBefore(front, schedule);
+			if (back.children.length > 0) main.appendChild(back);
 		</script>
 	</body>
 </html>
