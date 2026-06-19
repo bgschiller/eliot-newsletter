@@ -54,7 +54,7 @@ const printCssVars = printScheduleSize ? `
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>Eliot Newsletter — {dateStr}</title>
-    <link rel="stylesheet" href="/src/styles/global.css" />
+    <link rel="stylesheet" href="/styles/global.css" />
     {printCssVars && <style is:inline set:html={printCssVars} />}
   </head>
   <body data-date={isoDate}>
