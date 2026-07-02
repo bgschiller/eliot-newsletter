@@ -4,22 +4,23 @@
    ============================================ */
 
 /* --- Google Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap");
 
 /* --- CSS Variables --- */
 :root {
   /* Typography */
-  --font-display: 'UnifrakturMaguntia', 'Old English Text MT', 'Blackletter', serif;
-  --font-body: Georgia, 'Times New Roman', serif;
+  --font-display: "UnifrakturMaguntia", "Old English Text MT", "Blackletter",
+    serif;
+  --font-body: Georgia, "Times New Roman", serif;
 
   /* Colors */
-  --color-bg: #FDF8F0;
+  --color-bg: #fdf8f0;
   --color-text: #1a1a1a;
-  --color-muted: #6B6B6B;
-  --color-accent: #2D5016;
-  --color-accent-light: #8B9A6B;
-  --color-border: #D4CFC4;
-  --color-schedule-bg: #FFFDF7;
+  --color-muted: #6b6b6b;
+  --color-accent: #2d5016;
+  --color-accent-light: #8b9a6b;
+  --color-border: #d4cfc4;
+  --color-schedule-bg: #fffdf7;
 }
 
 /* --- Reset & Base --- */
@@ -49,7 +50,7 @@ body {
 
 /* --- Paper texture (screen only) --- */
 body::before {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
@@ -94,7 +95,9 @@ a {
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
-a:hover { color: var(--color-accent-light); }
+a:hover {
+  color: var(--color-accent-light);
+}
 
 /* ============================================
    PAGE LAYOUT (Screen)
@@ -106,11 +109,19 @@ a:hover { color: var(--color-accent-light); }
   flex-direction: column;
 }
 
-.articles-front { order: 1; }
-.schedule        { order: 0; }
-.articles-back   { order: 2; }
+.articles-front {
+  order: 1;
+}
+.schedule {
+  order: 0;
+}
+.articles-back {
+  order: 2;
+}
 
-.page-layout h2 { break-after: avoid; }
+.page-layout h2 {
+  break-after: avoid;
+}
 
 /* --- Schedule — Screen Default (mobile: full-width card at top) --- */
 .schedule {
@@ -160,18 +171,20 @@ a:hover { color: var(--color-accent-light); }
   border-bottom: 1px solid var(--color-border);
   font-size: 1.0625rem;
 }
-.schedule h2:first-child { margin-top: 0; }
+.schedule h2:first-child {
+  margin-top: 0;
+}
 
 .timeslot {
   display: grid;
-  grid-template-columns: 3.2em 1fr;
+  grid-template-columns: 2.4em 1fr;
   gap: 0.35rem;
   padding: 0.1rem 0;
   font-size: 0.85rem;
   align-items: baseline;
 }
 .time {
-  text-align: right;
+  text-align: left;
   color: var(--color-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -184,13 +197,20 @@ a:hover { color: var(--color-accent-light); }
   font-weight: bold;
 }
 
-.events { list-style: none; padding: 0; }
-.events li { 
+.events {
+  list-style: none;
+  padding: 0;
+}
+.events li {
   margin-bottom: 0.05rem;
   clear: both;
 }
-.events li:last-child { margin-bottom: 0; }
-.events p { display: inline; }
+.events li:last-child {
+  margin-bottom: 0;
+}
+.events p {
+  display: inline;
+}
 .events .loc {
   float: right;
   text-align: right;
@@ -209,8 +229,12 @@ a:hover { color: var(--color-accent-light); }
 main > p {
   margin-bottom: 0.55em;
 }
-em { font-style: italic; }
-strong { font-weight: bold; }
+em {
+  font-style: italic;
+}
+strong {
+  font-weight: bold;
+}
 
 /* Author credits: em-dash + italic name */
 main > p > em {
@@ -250,14 +274,18 @@ main > p.credit {
     order: 0;
   }
 
-  html { font-size: 100%; }
+  html {
+    font-size: 100%;
+  }
   body {
     max-width: none;
     padding: 0;
     background: white;
     color: black;
   }
-  body::before { display: none; }
+  body::before {
+    display: none;
+  }
 
   /* Title: blackletter, large, black */
   h1 {
@@ -307,7 +335,9 @@ main > p.credit {
     padding-bottom: 2pt;
     break-after: avoid;
   }
-  .schedule h2:first-child { margin-top: 0; }
+  .schedule h2:first-child {
+    margin-top: 0;
+  }
 
   .timeslot {
     display: grid;
@@ -319,10 +349,20 @@ main > p.credit {
     widows: 2;
   }
 
-  .time { text-align: right; color: black; }
-  .timeslot.bold .time { font-weight: bold; color: black; }
-  .timeslot.bold .events > :first-child { font-weight: bold; }
-  .events .loc { color: black; }
+  .time {
+    text-align: left;
+    color: black;
+  }
+  .timeslot.bold .time {
+    font-weight: bold;
+    color: black;
+  }
+  .timeslot.bold .events > :first-child {
+    font-weight: bold;
+  }
+  .events .loc {
+    color: black;
+  }
 
   /* Don't grey out events in print */
   .timeslot.past {
@@ -382,7 +422,9 @@ main > p.credit {
   }
 
   /* Hide URL printing */
-  a[href]::after { content: none !important; }
+  a[href]::after {
+    content: none !important;
+  }
 
   /* Page footer */
   .page-footer {
@@ -401,7 +443,9 @@ main > p.credit {
 
 /* --- Motion --- */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
