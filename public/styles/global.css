@@ -42,7 +42,7 @@ body {
   line-height: 1.35;
   color: var(--color-text);
   background-color: var(--color-bg);
-  max-width: 52rem;
+  max-width: 62rem;
   margin: 0 auto;
   padding: 1.25rem 1.5rem 2rem;
 }
@@ -125,7 +125,7 @@ a:hover { color: var(--color-accent-light); }
 @media screen and (min-width: 48rem) {
   .page-layout {
     display: grid;
-    grid-template-columns: 1fr 17rem;
+    grid-template-columns: 1fr 24rem;
     gap: 1.75rem;
     align-items: start;
   }
@@ -185,9 +185,18 @@ a:hover { color: var(--color-accent-light); }
 }
 
 .events { list-style: none; padding: 0; }
-.events li { margin-bottom: 0.05rem; }
+.events li { 
+  margin-bottom: 0.05rem;
+  clear: both;
+}
 .events li:last-child { margin-bottom: 0; }
 .events p { display: inline; }
+.events .loc {
+  float: right;
+  text-align: right;
+  color: var(--color-muted);
+  margin-left: 0.75rem;
+}
 
 /* Past events: subtly greyed out (screen only) */
 .timeslot.past {
@@ -313,6 +322,7 @@ main > p.credit {
   .time { text-align: right; color: black; }
   .timeslot.bold .time { font-weight: bold; color: black; }
   .timeslot.bold .events > :first-child { font-weight: bold; }
+  .events .loc { color: black; }
 
   /* Don't grey out events in print */
   .timeslot.past {
