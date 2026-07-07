@@ -122,8 +122,8 @@ a:hover {
 .articles-front {
   order: 1;
 }
-.schedule-front,
-.schedule-back {
+.schedule--today,
+.schedule--tomorrow {
   order: 0;
 }
 .articles-back {
@@ -135,8 +135,8 @@ a:hover {
 }
 
 /* --- Schedule — Screen Default (mobile: full-width card at top) --- */
-.schedule-front,
-.schedule-back {
+.schedule--today,
+.schedule--tomorrow {
   background: var(--color-schedule-bg);
   border: 1px solid var(--color-border);
   border-radius: 4px;
@@ -163,35 +163,39 @@ a:hover {
     grid-row: 2;
   }
 
-  .schedule-front,
-  .schedule-back {
+  .schedule--today {
     grid-column: 2;
+    grid-row: 1;
     order: 0;
     float: none;
     width: auto;
     margin-top: 0;
     margin-left: 0;
     margin-bottom: 0;
+    border-radius: 0;
   }
-  .schedule-front {
-    grid-row: 1;
-  }
-  .schedule-back {
+  .schedule--tomorrow {
+    grid-column: 2;
     grid-row: 2;
+    order: 0;
+    float: none;
+    width: auto;
+    margin-top: 0;
+    margin-left: 0;
+    margin-bottom: 0;
+    border-radius: 0;
   }
 }
 
 /* --- Schedule Component Internals --- */
-.schedule-front h2,
-.schedule-back h2 {
+.schedule h2 {
   margin-top: 0.9rem;
   margin-bottom: 0.35rem;
   padding-bottom: 0.2rem;
   border-bottom: 1px solid var(--color-border);
   font-size: 1.0625rem;
 }
-.schedule-front h2:first-child,
-.schedule-back h2:first-child {
+.schedule h2:first-child {
   margin-top: 0;
 }
 
@@ -290,8 +294,8 @@ main > p.credit {
   }
   .articles-front,
   .articles-back,
-  .schedule-front,
-  .schedule-back {
+  .schedule--today,
+  .schedule--tomorrow {
     order: 0;
   }
 
@@ -345,21 +349,8 @@ main > p.credit {
     display: none;
   }
 
-  /* Schedule: front page (afternoon only) — right column, bottom of page 1 */
-  .schedule-front {
-    float: right;
-    width: var(--print-schedule-w, 45%);
-    margin-left: 5%;
-    margin-bottom: 10pt;
-    background: none;
-    border: none;
-    border-radius: 0;
-    padding: 0;
-    break-after: page;
-  }
-
-  /* Schedule: back page (following day) — floats right on page 2 */
-  .schedule-back {
+  /* Schedule: today (afternoon) — floats right on page 1 */
+  .schedule--today {
     float: right;
     width: var(--print-schedule-w, 45%);
     margin-left: 5%;
@@ -370,8 +361,19 @@ main > p.credit {
     padding: 0;
   }
 
-  .schedule-front h2,
-  .schedule-back h2 {
+  /* Schedule: tomorrow (following day) — floats right on page 2 */
+  .schedule--tomorrow {
+    float: right;
+    width: var(--print-schedule-w, 45%);
+    margin-left: 5%;
+    margin-bottom: 10pt;
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .schedule h2 {
     font-size: var(--print-heading-size, 16pt);
     font-weight: bold;
     color: black;
@@ -381,8 +383,7 @@ main > p.credit {
     padding-bottom: 2pt;
     break-after: avoid;
   }
-  .schedule-front h2:first-child,
-  .schedule-back h2:first-child {
+  .schedule h2:first-child {
     margin-top: 0;
   }
 
@@ -416,10 +417,9 @@ main > p.credit {
     opacity: 1;
   }
 
-  /* ── Articles: Page 1 (front) — two columns ── */
+  /* ── Articles: Page 1 (front) — single column, wraps around schedule ── */
   .articles-front {
-    column-width: 250pt;
-    column-gap: 5%;
+    break-after: page;
   }
 
   /* ── Articles: Page 2 (back) — single column, wraps around schedule ── */

@@ -70,29 +70,27 @@ const printCssVars = printScheduleSize ? `
     </main>
     <footer class="page-footer">{dateStr} — Eliot Compass</footer>
     <script>
-      // Split articles at the page-1 / page-2 boundary.
+      // Reorder DOM for print: schedule-today → articles-front → schedule-tomorrow → articles-back
       const main = document.querySelector('main.page-layout');
-      const schedule = main.querySelector('.schedule');
+      const today = main.querySelector('.schedule--today');
+      const tomorrow = main.querySelector('.schedule--tomorrow');
       const page1Count = parseInt(main.dataset.page1Articles) || 0;
 
-      // Collect non-schedule siblings into a flat array
-      const children = [];
-      let sib = schedule.nextSibling;
-      while (sib) {
-        const next = sib.nextSibling;
-        children.push(sib);
-        sib = next;
+      // Collect article siblings (everything after schedules)
+      const articleNodes = [];
+      let node = tomorrow.nextSibling;
+      while (node) {
+        const next = node.nextSibling;
+        articleNodes.push(node);
+        node = next;
       }
 
-      // Find the split point: after the Nth <h2> heading
+      // Split articles at the Nth <h2> heading
       let h2Seen = 0;
-      let splitIdx = children.length;
-      for (let i = 0; i < children.length; i++) {
-        if (children[i].nodeName === 'H2') {
-          if (h2Seen === page1Count) {
-            splitIdx = i;
-            break;
-          }
+      let splitIdx = articleNodes.length;
+      for (let i = 0; i < articleNodes.length; i++) {
+        if (articleNodes[i].nodeName === 'H2') {
+          if (h2Seen === page1Count) { splitIdx = i; break; }
           h2Seen++;
         }
       }
@@ -102,11 +100,10 @@ const printCssVars = printScheduleSize ? `
       const back = document.createElement('div');
       back.className = 'articles-back';
 
-      for (let i = 0; i < splitIdx; i++) front.appendChild(children[i]);
-      for (let i = splitIdx; i < children.length; i++) back.appendChild(children[i]);
+      for (let i = 0; i < splitIdx; i++) front.appendChild(articleNodes[i]);
+      for (let i = splitIdx; i < articleNodes.length; i++) back.appendChild(articleNodes[i]);
 
-      // Put front before schedule, back after schedule
-      main.insertBefore(front, schedule);
+      main.insertBefore(front, tomorrow);
       if (back.children.length > 0) main.appendChild(back);
     </script>
   </body>

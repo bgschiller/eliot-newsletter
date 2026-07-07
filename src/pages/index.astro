@@ -73,32 +73,27 @@ const printCssVars = printScheduleSize ? `
 		)}
 		<footer class="page-footer">{dateStr} — Eliot Compass</footer>
 		<script>
-			// Split articles at the page-1 / page-2 boundary.
-			// DOM order: .articles-front  →  .schedule  →  .articles-back
-			//   Page 1: .articles-front (2 columns, breaks after)
-			//   Page 2: .schedule (float right) + .articles-back (wraps around)
+			// Reorder DOM for print: schedule-today → articles-front → schedule-tomorrow → articles-back
 			const main = document.querySelector('main.page-layout');
-			const schedule = main.querySelector('.schedule');
+			const today = main.querySelector('.schedule--today');
+			const tomorrow = main.querySelector('.schedule--tomorrow');
 			const page1Count = parseInt(main.dataset.page1Articles) || 0;
 
-			// Collect non-schedule siblings into a flat array
-			const children = [];
-			let sib = schedule.nextSibling;
-			while (sib) {
-				const next = sib.nextSibling;
-				children.push(sib);
-				sib = next;
+			// Collect article siblings (everything after schedules)
+			const articleNodes = [];
+			let node = tomorrow.nextSibling;
+			while (node) {
+				const next = node.nextSibling;
+				articleNodes.push(node);
+				node = next;
 			}
 
-			// Find the split point: after the Nth <h2> heading
+			// Split articles at the Nth <h2> heading
 			let h2Seen = 0;
-			let splitIdx = children.length;
-			for (let i = 0; i < children.length; i++) {
-				if (children[i].nodeName === 'H2') {
-					if (h2Seen === page1Count) {
-						splitIdx = i;
-						break;
-					}
+			let splitIdx = articleNodes.length;
+			for (let i = 0; i < articleNodes.length; i++) {
+				if (articleNodes[i].nodeName === 'H2') {
+					if (h2Seen === page1Count) { splitIdx = i; break; }
 					h2Seen++;
 				}
 			}
@@ -108,11 +103,11 @@ const printCssVars = printScheduleSize ? `
 			const back = document.createElement('div');
 			back.className = 'articles-back';
 
-			for (let i = 0; i < splitIdx; i++) front.appendChild(children[i]);
-			for (let i = splitIdx; i < children.length; i++) back.appendChild(children[i]);
+			for (let i = 0; i < splitIdx; i++) front.appendChild(articleNodes[i]);
+			for (let i = splitIdx; i < articleNodes.length; i++) back.appendChild(articleNodes[i]);
 
-			// Put front before schedule, back after schedule
-			main.insertBefore(front, schedule);
+			// Build DOM order: schedule--today → articles-front → schedule--tomorrow → articles-back
+			main.insertBefore(front, tomorrow);
 			if (back.children.length > 0) main.appendChild(back);
 		</script>
 		<script>
@@ -121,9 +116,6 @@ const printCssVars = printScheduleSize ? `
 				const pageDateStr = document.body.dataset.date;
 				if (!pageDateStr) return;
 				const pageYear = parseInt(pageDateStr.split('-')[0]);
-
-				const schedule = document.querySelector('.schedule');
-				if (!schedule) return;
 
 				const monthNames = ['January','February','March','April','May','June',
 					'July','August','September','October','November','December'];
@@ -143,61 +135,44 @@ const printCssVars = printScheduleSize ? `
 					return h * 60 + m;
 				}
 
-				let currentDayDate = null;
-				let prevMinutes = null;
-				let hasSeenNoon = false;
+				function greyOutSchedule(scheduleEl) {
+					let currentDayDate = null;
+					let prevMinutes = null;
+					let hasSeenNoon = false;
 
-				const children = schedule.children;
-				for (let i = 0; i < children.length; i++) {
-					const el = children[i];
-
-					if (el.nodeName === 'H2') {
-						currentDayDate = parseHeadingDate(el);
-						prevMinutes = null;
-						hasSeenNoon = false;
-						continue;
-					}
-
-					if (!el.classList || !el.classList.contains('timeslot')) continue;
-					if (!currentDayDate) continue;
-
-					const timeEl = el.querySelector('.time');
-					if (!timeEl) continue;
-					const timeStr = timeEl.textContent.trim();
-					const timeMinutes = parseTimeToMinutes(timeStr);
-
-					let isPM = false;
-					let isNextDay = false;
-
-					if (timeMinutes >= 12 * 60 && timeMinutes < 13 * 60) {
-						isPM = true;
-						hasSeenNoon = true;
-					} else if (timeMinutes >= 1 * 60 && timeMinutes < 6 * 60) {
-						if (prevMinutes !== null && prevMinutes >= 23 * 60) {
-							isNextDay = true;
-						} else {
-							isPM = true;
+					const children = scheduleEl.children;
+					for (let i = 0; i < children.length; i++) {
+						const el = children[i];
+						if (el.nodeName === 'H2') {
+							currentDayDate = parseHeadingDate(el);
+							prevMinutes = null;
+							hasSeenNoon = false;
+							continue;
 						}
-					} else if (timeMinutes >= 6 * 60 && timeMinutes < 12 * 60) {
-						if (hasSeenNoon) {
-							isPM = true;
+						if (!el.classList || !el.classList.contains('timeslot')) continue;
+						if (!currentDayDate) continue;
+						const timeEl = el.querySelector('.time');
+						if (!timeEl) continue;
+						const timeMinutes = parseTimeToMinutes(timeEl.textContent.trim());
+						let isPM = false, isNextDay = false;
+						if (timeMinutes >= 12 * 60 && timeMinutes < 13 * 60) {
+							isPM = true; hasSeenNoon = true;
+						} else if (timeMinutes >= 1 * 60 && timeMinutes < 6 * 60) {
+							isNextDay = prevMinutes !== null && prevMinutes >= 23 * 60;
+							if (!isNextDay) isPM = true;
+						} else if (timeMinutes >= 6 * 60 && timeMinutes < 12 * 60) {
+							if (hasSeenNoon) isPM = true;
 						}
+						let hours = Math.floor(timeMinutes / 60);
+						if (isPM && hours < 12) hours += 12;
+						const eventDate = new Date(pageYear, currentDayDate.month, currentDayDate.day, hours, timeMinutes % 60);
+						if (isNextDay) eventDate.setDate(eventDate.getDate() + 1);
+						if (eventDate.getTime() < Date.now()) el.classList.add('past');
+						prevMinutes = timeMinutes;
 					}
-
-					let hours = Math.floor(timeMinutes / 60);
-					if (isPM && hours < 12) hours += 12;
-
-					const eventDate = new Date(pageYear, currentDayDate.month, currentDayDate.day, hours, timeMinutes % 60);
-					if (isNextDay) {
-						eventDate.setDate(eventDate.getDate() + 1);
-					}
-
-					if (eventDate.getTime() < Date.now()) {
-						el.classList.add('past');
-					}
-
-					prevMinutes = timeMinutes;
 				}
+
+				document.querySelectorAll('.schedule--today, .schedule--tomorrow').forEach(greyOutSchedule);
 			})();
 		</script>
 	</body>

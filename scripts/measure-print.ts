@@ -1,9 +1,13 @@
 /**
  * Build-time print size measurement using @chenglou/pretext + node-canvas.
  *
- * Reads all MDX day files, measures schedule & article heights at print
- * geometry, computes optimal font sizes, and writes them into each file's
- * frontmatter so the Astro page can bake them into the print CSS.
+ * Layout model:
+ *   Page 1: nameplate → schedule-today (float right, 45%w) + articles-front (wrap)
+ *   Page 2: schedule-tomorrow (float right, 45%w) + articles-back (wrap)
+ *
+ * Each schedule must fit in one page height. Articles are measured at
+ * the narrow column width (remaining space left of schedule) for a
+ * conservative fit estimate.
  *
  * Run: pnpm measure
  */
@@ -14,22 +18,19 @@ import { fileURLToPath } from 'node:url';
 import { createCanvas } from 'canvas';
 import { prepare, layout } from '@chenglou/pretext';
 
-// Patch global canvas for pretext (it expects a browser Canvas)
 (globalThis as any).document = { createElement: () => createCanvas(1, 1) };
 
 // ── Print geometry (points) ─────────────────────────────────────
-const LETTER_W = 612; // US Legal width
-const LETTER_H = 1008; // US Legal height (14in)
+const LETTER_W = 612;
+const LETTER_H = 1008;
 const MARGIN = 0.55 * 72;
 const PAGE_W = LETTER_W - 2 * MARGIN;
 const PAGE_H = LETTER_H - 2 * MARGIN;
 const SCHEDULE_FRAC = 0.45;
 const COL_GAP_FRAC = 0.05;
 const SCHEDULE_W = PAGE_W * SCHEDULE_FRAC;
-const ARTICLE_W_P2 = (PAGE_W * (1 - COL_GAP_FRAC)) / 2;
-const SCHEDULE_LH_RATIO = 1.15;
-const BODY_LH_RATIO = 1.2;
-const SCHEDULE_GAP = 1.5;
+const ARTICLE_W = PAGE_W * (1 - SCHEDULE_FRAC - COL_GAP_FRAC);
+const LINE_H_RATIO = 1.2;
 
 const TARGET_SCHEDULE = 10;
 const TARGET_BODY = 11;
@@ -44,239 +45,199 @@ function font(sizePt: number, bold = false): string {
   return `${bold ? 'bold ' : ''}${sizePt}pt Georgia`;
 }
 
-function measureLines(lines: string[], sizePt: number, colW: number, lhRatio: number): number {
-  let total = 0;
-  const f = font(sizePt);
-  const lh = sizePt * lhRatio;
-  for (const text of lines) {
-    const p = prepare(text, f);
-    const { height } = layout(p, colW, lh);
-    total += height > 0 ? height : lh;
-  }
-  return total;
+function measureHeight(text: string, sizePt: number, colW: number): number {
+  const p = prepare(text, font(sizePt));
+  const result = layout(p, colW, sizePt * LINE_H_RATIO);
+  return result.height > 0 ? result.height : sizePt * LINE_H_RATIO;
 }
 
 // ── MDX parsing ──────────────────────────────────────────────────
 
-interface TimeslotBlock {
-  events: string[];
+interface TimeslotBlock { events: string[] }
+interface Article { heading: string; paragraphs: string[] }
+
+function extractTimeslots(raw: string): TimeslotBlock[] {
+  const blocks: TimeslotBlock[] = [];
+  const slotRegex = /<Timeslot[^>]*>([\s\S]*?)<\/Timeslot>/g;
+  let m;
+  while ((m = slotRegex.exec(raw)) !== null) {
+    const events: string[] = [];
+    const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/g;
+    let lm;
+    while ((lm = liRegex.exec(m[1])) !== null) {
+      const text = lm[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (text) events.push(text);
+    }
+    if (events.length > 0) blocks.push({ events });
+  }
+  return blocks;
 }
 
-interface Article {
-  heading: string;
-  paragraphs: string[];
-}
-
-function parseMdx(raw: string): { schedule: TimeslotBlock[]; articles: Article[] } {
-  const schedule: TimeslotBlock[] = [];
+function extractArticles(raw: string): Article[] {
   const articles: Article[] = [];
-
-  // Extract schedule: between <Schedule> and </Schedule>
-  const schedMatch = raw.match(/<Schedule>([\s\S]*?)<\/Schedule>/);
-  if (schedMatch) {
-    const schedRaw = schedMatch[1];
-    // Find each <Timeslot ...>...</Timeslot>
-    const slotRegex = /<Timeslot[^>]*>([\s\S]*?)<\/Timeslot>/g;
-    let slotMatch;
-    while ((slotMatch = slotRegex.exec(schedRaw)) !== null) {
-      const inner = slotMatch[1];
-      const events: string[] = [];
-      const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/g;
-      let liMatch;
-      while ((liMatch = liRegex.exec(inner)) !== null) {
-        // Strip HTML tags from event text
-        let text = liMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-        if (text) events.push(text);
+  // Find last </Schedule> and take everything after it
+  const lastClose = raw.lastIndexOf('</Schedule>');
+  if (lastClose === -1) return articles;
+  const after = raw.slice(lastClose + '</Schedule>'.length);
+  const sections = after.split(/^##\s+/m).filter(Boolean);
+  for (const section of sections) {
+    const lines = section.split('\n');
+    const heading = lines[0].trim();
+    const paragraphs: string[] = [];
+    let buf = '';
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line === '') {
+        if (buf) { paragraphs.push(buf); buf = ''; }
+      } else if (!line.startsWith('<AuthorCredit')) {
+        buf = buf ? buf + ' ' + line : line;
       }
-      if (events.length > 0) schedule.push({ events });
     }
+    if (buf) paragraphs.push(buf);
+    if (heading) articles.push({ heading, paragraphs });
   }
+  return articles;
+}
 
-  // Extract articles: everything after </Schedule>
-  const afterSched = raw.split('</Schedule>')[1];
-  if (afterSched) {
-    // Split by ## headings
-    const sections = afterSched.split(/^##\s+/m).filter(Boolean);
-    for (const section of sections) {
-      const lines = section.split('\n');
-      const heading = lines[0].trim();
-      const paragraphs: string[] = [];
-
-      let collecting = false;
-      let buf = '';
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line === '') {
-          if (buf) { paragraphs.push(buf); buf = ''; }
-          collecting = false;
-        } else if (line.startsWith('<AuthorCredit')) {
-          if (buf) { paragraphs.push(buf); buf = ''; }
-          // Skip author credits in measurement (they're small)
-          collecting = false;
-        } else {
-          if (collecting) buf += ' ' + line;
-          else { buf = line; collecting = true; }
-        }
-      }
-      if (buf) paragraphs.push(buf);
-
-      if (heading) articles.push({ heading, paragraphs });
-    }
-  }
-
-  return { schedule, articles };
+function parseMdx(raw: string): { today: TimeslotBlock[]; tomorrow: TimeslotBlock[]; articles: Article[] } {
+  const todayMatch = raw.match(/<Schedule day="today">([\s\S]*?)<\/Schedule>/);
+  const tomorrowMatch = raw.match(/<Schedule day="tomorrow">([\s\S]*?)<\/Schedule>/);
+  return {
+    today: todayMatch ? extractTimeslots(todayMatch[1]) : [],
+    tomorrow: tomorrowMatch ? extractTimeslots(tomorrowMatch[1]) : [],
+    articles: extractArticles(raw),
+  };
 }
 
 // ── Measurement ──────────────────────────────────────────────────
 
-function measureSchedule(blocks: TimeslotBlock[]): number {
+function measureSchedule(blocks: TimeslotBlock[], sizePt: number): number {
   let total = 0;
   for (let i = 0; i < blocks.length; i++) {
-    total += measureLines(blocks[i].events, TARGET_SCHEDULE, SCHEDULE_W, SCHEDULE_LH_RATIO);
-    if (i < blocks.length - 1) total += SCHEDULE_GAP;
+    for (const event of blocks[i].events) {
+      total += measureHeight(event, sizePt, SCHEDULE_W);
+    }
+    if (i < blocks.length - 1) total += 1.5; // gap between timeslots
   }
+  // Add heading height
+  total += sizePt * LINE_H_RATIO;
   return total;
 }
 
-function measureArticleHeight(art: Article, bodySize: number, headingSize: number): number {
-  let h = 0;
-  const hp = prepare(art.heading, font(headingSize, true));
-  h += layout(hp, ARTICLE_W_P2, headingSize * BODY_LH_RATIO).height || headingSize * BODY_LH_RATIO;
+function measureArticleHeight(art: Article, bodySize: number, headingSize: number, colW: number): number {
+  let h = measureHeight(art.heading, headingSize, colW);
   for (const para of art.paragraphs) {
-    const pp = prepare(para, font(bodySize));
-    h += layout(pp, ARTICLE_W_P2, bodySize * BODY_LH_RATIO).height || bodySize * BODY_LH_RATIO;
+    h += measureHeight(para, bodySize, colW);
   }
   return h;
 }
 
-function measureArticles(articles: Article[], bodySize: number, headingSize: number): number {
-  let total = 0;
-  for (const art of articles) {
-    total += measureArticleHeight(art, bodySize, headingSize);
+function findBestSize(
+  blocks: TimeslotBlock[],
+  targetSize: number,
+  maxHeight: number,
+  colW: number,
+): number {
+  const h = measureSchedule(blocks, targetSize);
+  if (h <= maxHeight) return targetSize;
+
+  let lo = 7, hi = targetSize;
+  for (let i = 0; i < 12; i++) {
+    const mid = (lo + hi) / 2;
+    if (measureSchedule(blocks, mid) <= maxHeight) lo = mid;
+    else hi = mid;
   }
-  return total;
+  return Math.round(lo * 10) / 10;
 }
 
-/**
- * Find how many articles fit in 2 page-heights of columns (page 1).
- * The rest overflow to page 2 (1 column next to schedule).
- */
 function findPage1Split(
   articles: Article[],
   bodySize: number,
   headingSize: number,
+  scheduleTodayH: number,
 ): number {
-  let cumulative = 0;
-  const limit = 2 * PAGE_H;
+  // Page 1 article capacity (conservative: narrow width only):
+  //   PAGE_H total, minus schedule heading ~16pt
+  const capacity = PAGE_H;
+  let used = 0;
   for (let i = 0; i < articles.length; i++) {
-    cumulative += measureArticleHeight(articles[i], bodySize, headingSize);
-    if (cumulative > limit) {
-      return i; // articles 0..i-1 fit on page 1
-    }
+    used += measureArticleHeight(articles[i], bodySize, headingSize, ARTICLE_W);
+    if (used > capacity) return i;
   }
-  return articles.length; // all fit on page 1
+  return articles.length;
 }
 
-function computeSizes(
-  schedule: TimeslotBlock[],
-  articles: Article[],
-): { scheduleSize: number; bodySize: number; headingSize: number; page1Articles: number } {
-  // Schedule: check if it fits at target size
-  let scheduleSize = TARGET_SCHEDULE;
-  const schedH = measureSchedule(schedule);
-  if (schedH > PAGE_H) {
-    // Binary search for largest size that fits
-    let lo = 7, hi = TARGET_SCHEDULE;
-    for (let i = 0; i < 12; i++) {
-      const mid = (lo + hi) / 2;
-      let h = 0;
-      for (let j = 0; j < schedule.length; j++) {
-        h += measureLines(schedule[j].events, mid, SCHEDULE_W, SCHEDULE_LH_RATIO);
-        if (j < schedule.length - 1) h += Math.max(1, SCHEDULE_GAP * (mid / TARGET_SCHEDULE));
-      }
-      if (h <= PAGE_H) lo = mid; else hi = mid;
-    }
-    scheduleSize = Math.round(lo * 10) / 10;
-  }
+// ── Frontmatter ──────────────────────────────────────────────────
 
-  // Articles: check at target sizes
-  const totalColSpace = 3 * PAGE_H;
-  let bodySize = TARGET_BODY;
-  let headingSize = TARGET_HEADING;
-
-  const h = measureArticles(articles, TARGET_BODY, TARGET_HEADING);
-  if (h > totalColSpace) {
-    // Find largest body size that fits, keeping heading ~1.45× body
-    let bestBody = 7;
-    for (let tryBody = 1; tryBody <= TARGET_BODY; tryBody += 0.25) {
-      const tryH = tryBody * 1.45;
-      const th = measureArticles(articles, tryBody, tryH);
-      if (th <= totalColSpace) bestBody = tryBody;
-      else break;
-    }
-    bodySize = Math.round(bestBody * 100) / 100;
-    headingSize = Math.round(bestBody * 1.45 * 10) / 10;
-  }
-
-  const page1Articles = findPage1Split(articles, bodySize, headingSize);
-
-  return { scheduleSize, bodySize, headingSize, page1Articles };
-}
-
-// ── Frontmatter update ───────────────────────────────────────────
-
-function updateFrontmatter(
-  filePath: string,
-  raw: string,
-  sizes: { scheduleSize: number; bodySize: number; headingSize: number; page1Articles: number },
-): string {
-  // The frontmatter is between --- fences
+function updateFrontmatter(raw: string, sizes: { scheduleSize: number; bodySize: number; headingSize: number; page1Articles: number }): string {
   const parts = raw.split('---');
-  if (parts.length < 3) return raw; // no frontmatter
-
-  let fm = parts[1];
-  // Remove any existing print size lines
-  fm = fm.replace(/^printScheduleSize:.*\n?/gm, '');
-  fm = fm.replace(/^printBodySize:.*\n?/gm, '');
-  fm = fm.replace(/^printHeadingSize:.*\n?/gm, '');
-  fm = fm.replace(/^printPage1Articles:.*\n?/gm, '');
-  // Trim trailing whitespace
-  fm = fm.trimEnd();
-
-  // Append new sizes
+  if (parts.length < 3) return raw;
+  let fm = parts[1]
+    .replace(/^printScheduleSize:.*\n?/gm, '')
+    .replace(/^printBodySize:.*\n?/gm, '')
+    .replace(/^printHeadingSize:.*\n?/gm, '')
+    .replace(/^printPage1Articles:.*\n?/gm, '')
+    .trimEnd();
   fm += `\nprintScheduleSize: ${sizes.scheduleSize}`;
   fm += `\nprintBodySize: ${sizes.bodySize}`;
   fm += `\nprintHeadingSize: ${sizes.headingSize}`;
   fm += `\nprintPage1Articles: ${sizes.page1Articles}`;
-
   return `---${fm}\n---${parts.slice(2).join('---')}`;
 }
 
 // ── Main ─────────────────────────────────────────────────────────
 
 async function main() {
-  const files = (await readdir(DAYS_DIR)).filter((f) => f.endsWith('.mdx'));
+  const files = (await readdir(DAYS_DIR)).filter(f => f.endsWith('.mdx'));
 
   for (const file of files) {
     const filePath = join(DAYS_DIR, file);
     const raw = readFileSync(filePath, 'utf-8');
-    const { schedule, articles } = parseMdx(raw);
+    const { today, tomorrow, articles } = parseMdx(raw);
 
-    if (schedule.length === 0 && articles.length === 0) {
-      console.log(`⚠ ${file}: no content found, skipping`);
+    if (today.length === 0 && tomorrow.length === 0) {
+      console.log(`⚠ ${file}: no schedule found, skipping`);
       continue;
     }
 
-    const sizes = computeSizes(schedule, articles);
+    // Find schedule size that fits the taller of two schedules
+    const todayH = measureSchedule(today, TARGET_SCHEDULE);
+    const tomorrowH = measureSchedule(tomorrow, TARGET_SCHEDULE);
+    const maxSchedH = Math.max(todayH, tomorrowH);
+    const allBlocks = [...today, ...tomorrow];
 
-    const updated = updateFrontmatter(filePath, raw, sizes);
+    let scheduleSize = TARGET_SCHEDULE;
+    if (maxSchedH > PAGE_H) {
+      scheduleSize = findBestSize(allBlocks, TARGET_SCHEDULE, PAGE_H, SCHEDULE_W);
+    }
+
+    // Article sizes
+    let bodySize = TARGET_BODY;
+    let headingSize = TARGET_HEADING;
+    const totalColSpace = 2 * PAGE_H; // one page-column per page
+    const totalH = articles.reduce((sum, a) => sum + measureArticleHeight(a, TARGET_BODY, TARGET_HEADING, ARTICLE_W), 0);
+
+    if (totalH > totalColSpace) {
+      let bestBody = 7;
+      for (let tryBody = 1; tryBody <= TARGET_BODY; tryBody += 0.25) {
+        const tryH = tryBody * 1.45;
+        const th = articles.reduce((sum, a) => sum + measureArticleHeight(a, tryBody, tryH, ARTICLE_W), 0);
+        if (th <= totalColSpace) bestBody = tryBody;
+        else break;
+      }
+      bodySize = Math.round(bestBody * 100) / 100;
+      headingSize = Math.round(bestBody * 1.45 * 10) / 10;
+    }
+
+    const page1Articles = findPage1Split(articles, bodySize, headingSize, measureSchedule(today, scheduleSize));
+
+    const updated = updateFrontmatter(raw, { scheduleSize, bodySize, headingSize, page1Articles });
     writeFileSync(filePath, updated, 'utf-8');
 
     console.log(`📐 ${file}:`);
-    console.log(`   Schedule: ${sizes.scheduleSize}pt (${schedule.length} blocks, ${schedule.reduce((s, b) => s + b.events.length, 0)} events)`);
-    console.log(`   Body:     ${sizes.bodySize}pt (${articles.length} articles, ${articles.reduce((s, a) => s + a.paragraphs.length, 0)} paragraphs)`);
-    console.log(`   Heading:  ${sizes.headingSize}pt`);
-    console.log(`   Split:    first ${sizes.page1Articles} articles → page 1, rest → page 2`);
+    console.log(`   Schedule: ${scheduleSize}pt (today ${today.length} + tomorrow ${tomorrow.length} blocks)`);
+    console.log(`   Body:     ${bodySize}pt, Heading: ${headingSize}pt`);
+    console.log(`   Split:    first ${page1Articles} of ${articles.length} articles → page 1`);
   }
 }
 
