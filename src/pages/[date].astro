@@ -58,8 +58,10 @@ const printCssVars = printScheduleSize ? `
     {printCssVars && <style is:inline set:html={printCssVars} />}
   </head>
   <body data-date={isoDate}>
-    <h1>The Eliot Compass</h1>
-    <p class="page-subtitle">{dateStr}</p>
+    <header class="page-header">
+      <img class="nameplate" src="/the-daily-thread.svg" alt="The Daily Thread" />
+      <p class="page-subtitle">{dateStr}</p>
+    </header>
     <nav class="back-link">
       <a href="/">&larr; Current Issue</a>
     </nav>

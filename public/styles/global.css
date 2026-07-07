@@ -60,22 +60,32 @@ body::before {
 }
 
 /* --- Typography --- */
-h1 {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 6vw, 2.75rem);
-  font-weight: normal;
-  line-height: 1.05;
-  color: var(--color-accent);
-  margin-bottom: 0.15em;
-}
-
-.page-subtitle {
-  font-size: 0.875rem;
-  font-style: italic;
-  color: var(--color-muted);
+.page-header {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
   margin-bottom: 1.75rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid var(--color-border);
+}
+
+.nameplate {
+  display: block;
+  width: 33%;
+  min-width: 8rem;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.page-subtitle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--color-muted);
+  padding-bottom: 0;
 }
 
 h2 {
@@ -112,7 +122,8 @@ a:hover {
 .articles-front {
   order: 1;
 }
-.schedule {
+.schedule-front,
+.schedule-back {
   order: 0;
 }
 .articles-back {
@@ -124,12 +135,13 @@ a:hover {
 }
 
 /* --- Schedule — Screen Default (mobile: full-width card at top) --- */
-.schedule {
+.schedule-front,
+.schedule-back {
   background: var(--color-schedule-bg);
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 1rem 1.125rem;
-  margin-top: 1.5rem;
+  margin-top: 0.25rem;
 }
 
 /* --- Schedule: desktop — right sidebar via grid --- */
@@ -151,9 +163,9 @@ a:hover {
     grid-row: 2;
   }
 
-  .schedule {
+  .schedule-front,
+  .schedule-back {
     grid-column: 2;
-    grid-row: 1 / 3;
     order: 0;
     float: none;
     width: auto;
@@ -161,17 +173,25 @@ a:hover {
     margin-left: 0;
     margin-bottom: 0;
   }
+  .schedule-front {
+    grid-row: 1;
+  }
+  .schedule-back {
+    grid-row: 2;
+  }
 }
 
 /* --- Schedule Component Internals --- */
-.schedule h2 {
+.schedule-front h2,
+.schedule-back h2 {
   margin-top: 0.9rem;
   margin-bottom: 0.35rem;
   padding-bottom: 0.2rem;
   border-bottom: 1px solid var(--color-border);
   font-size: 1.0625rem;
 }
-.schedule h2:first-child {
+.schedule-front h2:first-child,
+.schedule-back h2:first-child {
   margin-top: 0;
 }
 
@@ -270,7 +290,8 @@ main > p.credit {
   }
   .articles-front,
   .articles-back,
-  .schedule {
+  .schedule-front,
+  .schedule-back {
     order: 0;
   }
 
@@ -287,22 +308,35 @@ main > p.credit {
     display: none;
   }
 
-  /* Title: blackletter, large, black */
-  h1 {
-    font-size: 42pt;
-    color: black;
-    margin-bottom: 3pt;
-    line-height: 1;
+  /* Page header: nameplate centered, date pinned right */
+  .page-header {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin-bottom: 14pt;
+    padding-bottom: 6pt;
+    border-bottom: 1.5pt solid black;
+  }
+
+  .nameplate {
+    display: block;
+    width: 33%;
+    min-width: 8rem;
+    height: auto;
+    flex-shrink: 0;
   }
 
   /* Date line */
   .page-subtitle {
+    position: absolute;
+    right: 0;
+    bottom: 0;
     font-size: 11pt;
     font-style: normal;
     color: black;
-    margin-bottom: 14pt;
-    padding-bottom: 6pt;
-    border-bottom: 1.5pt solid black;
+    margin-bottom: 0;
+    padding-bottom: 0;
   }
 
   /* Hide web-only navigation */
@@ -311,10 +345,21 @@ main > p.credit {
     display: none;
   }
 
-  /* Schedule: floats right on page 2 at full sheet height.
-     .articles-front has break-after: page so schedule always
-     lands at the top of page 2. */
-  .schedule {
+  /* Schedule: front page (afternoon only) — right column, bottom of page 1 */
+  .schedule-front {
+    float: right;
+    width: var(--print-schedule-w, 45%);
+    margin-left: 5%;
+    margin-bottom: 10pt;
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    break-after: page;
+  }
+
+  /* Schedule: back page (following day) — floats right on page 2 */
+  .schedule-back {
     float: right;
     width: var(--print-schedule-w, 45%);
     margin-left: 5%;
@@ -325,7 +370,8 @@ main > p.credit {
     padding: 0;
   }
 
-  .schedule h2 {
+  .schedule-front h2,
+  .schedule-back h2 {
     font-size: var(--print-heading-size, 16pt);
     font-weight: bold;
     color: black;
@@ -335,7 +381,8 @@ main > p.credit {
     padding-bottom: 2pt;
     break-after: avoid;
   }
-  .schedule h2:first-child {
+  .schedule-front h2:first-child,
+  .schedule-back h2:first-child {
     margin-top: 0;
   }
 
@@ -373,7 +420,6 @@ main > p.credit {
   .articles-front {
     column-width: 250pt;
     column-gap: 5%;
-    break-after: page;
   }
 
   /* ── Articles: Page 2 (back) — single column, wraps around schedule ── */

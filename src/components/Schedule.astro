@@ -3,3 +3,49 @@
 <div class="schedule">
   <slot />
 </div>
+<script>
+  // Print-only: split the schedule into afternoon (page 1) and following day (page 2)
+  // The schedule has two <h2> headings; split at the second one.
+  (function() {
+    const schedule = document.querySelector('.schedule');
+    if (!schedule) return;
+
+    const h2s = schedule.querySelectorAll('h2');
+    if (h2s.length < 2) return;
+
+    const secondH2 = h2s[1];
+
+    // Collect children from the second <h2> onward
+    const backChildren = [];
+    let el = secondH2;
+    while (el) {
+      backChildren.push(el);
+      el = el.nextElementSibling;
+    }
+
+    // Remove back-children from schedule, keep front-children
+    backChildren.forEach(c => c.remove());
+
+    // Create schedule-back and move back children into it
+    const back = document.createElement('div');
+    back.className = 'schedule-back';
+    backChildren.forEach(c => back.appendChild(c));
+
+    // Rename original schedule to schedule-front
+    schedule.classList.remove('schedule');
+    schedule.classList.add('schedule-front');
+
+    // Place schedule-front after .articles-front (page 1, bottom)
+    // Place schedule-back where schedule was (page 2)
+    const main = document.querySelector('main.page-layout');
+    const front = main.querySelector('.articles-front');
+    if (front && schedule.nextSibling) {
+      main.insertBefore(schedule, front.nextSibling);
+    } else if (front) {
+      main.appendChild(schedule);
+    }
+    if (back.children.length > 0) {
+      main.appendChild(back);
+    }
+  })();
+</script>
