@@ -10,7 +10,6 @@ const days = defineCollection({
     printScheduleSize: z.number().optional(),
     printBodySize: z.number().optional(),
     printHeadingSize: z.number().optional(),
-    printPage1Articles: z.number().optional(),
   }),
 });
 

@@ -1,6 +1,9 @@
 ---
-const { day } = Astro.props;
+const { day, breakBefore = false, breakAfter = false } = Astro.props;
 ---
-<div class={`schedule schedule--${day}`}>
+<div
+  class:list={["schedule", `schedule--${day}`]}
+  style={breakBefore ? "break-before: page" : breakAfter ? "break-after: page" : undefined}
+>
   <slot />
 </div>

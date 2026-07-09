@@ -24,7 +24,7 @@ const dateStr = latest.data.date.toLocaleDateString('en-US', {
 const isoDate = latest.data.date.toISOString().split('T')[0];
 
 // Print sizes from build-time measurement (pnpm measure)
-const { printScheduleSize, printBodySize, printHeadingSize, printPage1Articles } = latest.data;
+const { printScheduleSize, printBodySize, printHeadingSize } = latest.data;
 const printCssVars = printScheduleSize ? `
 @media print {
 	:root {
@@ -51,7 +51,7 @@ const printCssVars = printScheduleSize ? `
 			<img class="nameplate" src="/the-daily-thread.svg" alt="The Daily Thread" />
 			<p class="page-subtitle">{dateStr}</p>
 		</header>
-		<main class="page-layout" data-page1-articles={printPage1Articles ?? 0}>
+		<main class="page-layout">
 			<Content components={{ Schedule, Timeslot, AuthorCredit }} />
 		</main>
 		{priorDays.length > 0 && (
@@ -72,44 +72,6 @@ const printCssVars = printScheduleSize ? `
 			</nav>
 		)}
 		<footer class="page-footer">{dateStr} — Eliot Compass</footer>
-		<script>
-			// Reorder DOM for print: schedule-today → articles-front → schedule-tomorrow → articles-back
-			const main = document.querySelector('main.page-layout');
-			const today = main.querySelector('.schedule--today');
-			const tomorrow = main.querySelector('.schedule--tomorrow');
-			const page1Count = parseInt(main.dataset.page1Articles) || 0;
-
-			// Collect article siblings (everything after schedules)
-			const articleNodes = [];
-			let node = tomorrow.nextSibling;
-			while (node) {
-				const next = node.nextSibling;
-				articleNodes.push(node);
-				node = next;
-			}
-
-			// Split articles at the Nth <h2> heading
-			let h2Seen = 0;
-			let splitIdx = articleNodes.length;
-			for (let i = 0; i < articleNodes.length; i++) {
-				if (articleNodes[i].nodeName === 'H2') {
-					if (h2Seen === page1Count) { splitIdx = i; break; }
-					h2Seen++;
-				}
-			}
-
-			const front = document.createElement('div');
-			front.className = 'articles-front';
-			const back = document.createElement('div');
-			back.className = 'articles-back';
-
-			for (let i = 0; i < splitIdx; i++) front.appendChild(articleNodes[i]);
-			for (let i = splitIdx; i < articleNodes.length; i++) back.appendChild(articleNodes[i]);
-
-			// Build DOM order: schedule--today → articles-front → schedule--tomorrow → articles-back
-			main.insertBefore(front, tomorrow);
-			if (back.children.length > 0) main.appendChild(back);
-		</script>
 		<script>
 			// Grey out events that have already occurred
 			(function() {

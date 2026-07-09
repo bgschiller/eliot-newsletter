@@ -35,7 +35,7 @@ const dateStr = day.data.date.toLocaleDateString('en-US', {
 const isoDate = day.data.date.toISOString().split('T')[0];
 
 // Print sizes from build-time measurement (pnpm measure)
-const { printScheduleSize, printBodySize, printHeadingSize, printPage1Articles } = day.data;
+const { printScheduleSize, printBodySize, printHeadingSize } = day.data;
 const printCssVars = printScheduleSize ? `
 @media print {
   :root {
@@ -65,46 +65,10 @@ const printCssVars = printScheduleSize ? `
     <nav class="back-link">
       <a href="/">&larr; Current Issue</a>
     </nav>
-    <main class="page-layout" data-page1-articles={printPage1Articles ?? 0}>
+    <main class="page-layout">
       <Content components={{ Schedule, Timeslot, AuthorCredit }} />
     </main>
     <footer class="page-footer">{dateStr} — Eliot Compass</footer>
-    <script>
-      // Reorder DOM for print: schedule-today → articles-front → schedule-tomorrow → articles-back
-      const main = document.querySelector('main.page-layout');
-      const today = main.querySelector('.schedule--today');
-      const tomorrow = main.querySelector('.schedule--tomorrow');
-      const page1Count = parseInt(main.dataset.page1Articles) || 0;
 
-      // Collect article siblings (everything after schedules)
-      const articleNodes = [];
-      let node = tomorrow.nextSibling;
-      while (node) {
-        const next = node.nextSibling;
-        articleNodes.push(node);
-        node = next;
-      }
-
-      // Split articles at the Nth <h2> heading
-      let h2Seen = 0;
-      let splitIdx = articleNodes.length;
-      for (let i = 0; i < articleNodes.length; i++) {
-        if (articleNodes[i].nodeName === 'H2') {
-          if (h2Seen === page1Count) { splitIdx = i; break; }
-          h2Seen++;
-        }
-      }
-
-      const front = document.createElement('div');
-      front.className = 'articles-front';
-      const back = document.createElement('div');
-      back.className = 'articles-back';
-
-      for (let i = 0; i < splitIdx; i++) front.appendChild(articleNodes[i]);
-      for (let i = splitIdx; i < articleNodes.length; i++) back.appendChild(articleNodes[i]);
-
-      main.insertBefore(front, tomorrow);
-      if (back.children.length > 0) main.appendChild(back);
-    </script>
   </body>
 </html>

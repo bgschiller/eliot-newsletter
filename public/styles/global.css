@@ -114,76 +114,28 @@ a:hover {
    ============================================ */
 
 .page-layout {
-  /* On mobile, use flex column so we can reorder schedule to the top */
-  display: flex;
-  flex-direction: column;
-}
-
-.articles-front {
-  order: 1;
-}
-.schedule--today,
-.schedule--tomorrow {
-  order: 0;
-}
-.articles-back {
-  order: 2;
+  display: block;
 }
 
 .page-layout h2 {
   break-after: avoid;
 }
 
-/* --- Schedule — Screen Default (mobile: full-width card at top) --- */
-.schedule--today,
-.schedule--tomorrow {
+/* --- Schedule — Screen Default (mobile: full-width card) --- */
+.schedule {
   background: var(--color-schedule-bg);
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 1rem 1.125rem;
-  margin-top: 0.25rem;
+  margin: 0 0 1rem 1rem;
 }
 
-/* --- Schedule: desktop — right sidebar via grid --- */
+/* --- Schedule: desktop — float right so articles wrap beside it --- */
 @media screen and (min-width: 48rem) {
-  .page-layout {
-    display: grid;
-    grid-template-columns: 1fr 24rem;
-    gap: 1.75rem;
-    align-items: start;
-  }
-
-  .articles-front,
-  .articles-back {
-    grid-column: 1;
-    order: 0;
-  }
-
-  .articles-back {
-    grid-row: 2;
-  }
-
-  .schedule--today {
-    grid-column: 2;
-    grid-row: 1;
-    order: 0;
-    float: none;
-    width: auto;
-    margin-top: 0;
-    margin-left: 0;
-    margin-bottom: 0;
-    border-radius: 0;
-  }
-  .schedule--tomorrow {
-    grid-column: 2;
-    grid-row: 2;
-    order: 0;
-    float: none;
-    width: auto;
-    margin-top: 0;
-    margin-left: 0;
-    margin-bottom: 0;
-    border-radius: 0;
+  .schedule {
+    float: right;
+    width: 24rem;
+    margin: 0 0 1rem 1.75rem;
   }
 }
 
@@ -248,9 +200,7 @@ a:hover {
 }
 
 /* --- Article Body --- */
-.articles-front p,
-.articles-back p,
-main > p {
+main p {
   margin-bottom: 0.55em;
 }
 em {
@@ -286,17 +236,6 @@ main > p.credit {
   @page {
     size: 8.5in 14in;
     margin: 0.55in;
-  }
-
-  /* Reset mobile flex/order so float + column layout works */
-  .page-layout {
-    display: block;
-  }
-  .articles-front,
-  .articles-back,
-  .schedule--today,
-  .schedule--tomorrow {
-    order: 0;
   }
 
   html {
@@ -349,22 +288,10 @@ main > p.credit {
     display: none;
   }
 
-  /* Schedule: today (afternoon) — floats right on page 1 */
-  .schedule--today {
+  /* Schedule: floats right so articles wrap beside/below it */
+  .schedule {
     float: right;
-    width: var(--print-schedule-w, 45%);
-    margin-left: 5%;
-    margin-bottom: 10pt;
-    background: none;
-    border: none;
-    border-radius: 0;
-    padding: 0;
-  }
-
-  /* Schedule: tomorrow (following day) — floats right on page 2 */
-  .schedule--tomorrow {
-    float: right;
-    width: var(--print-schedule-w, 45%);
+    width: 45%;
     margin-left: 5%;
     margin-bottom: 10pt;
     background: none;
@@ -417,20 +344,8 @@ main > p.credit {
     opacity: 1;
   }
 
-  /* ── Articles: Page 1 (front) — single column, wraps around schedule ── */
-  .articles-front {
-    break-after: page;
-  }
-
-  /* ── Articles: Page 2 (back) — single column, wraps around schedule ── */
-  .articles-back {
-  }
-
   /* Article headings */
-  .articles-front h2,
-  .articles-back h2,
-  .page-layout > h2,
-  main > h2 {
+  main h2 {
     font-size: var(--print-heading-size, 16pt);
     font-weight: bold;
     color: black;
@@ -438,18 +353,12 @@ main > p.credit {
     margin-bottom: 3pt;
     break-after: avoid;
   }
-  .articles-front h2:first-child,
-  .articles-back h2:first-child,
-  .page-layout > h2:first-of-type,
-  main > h2:first-of-type {
+  main h2:first-of-type {
     margin-top: 0;
   }
 
   /* Body text */
-  .articles-front p,
-  .articles-back p,
-  .page-layout > p,
-  main > p {
+  main p {
     font-size: var(--print-body-size, 11pt);
     margin-bottom: 0;
     orphans: 3;
@@ -457,9 +366,7 @@ main > p.credit {
   }
 
   /* Author credits */
-  .articles-front p.credit,
-  .articles-back p.credit,
-  main > p.credit {
+  main p.credit {
     color: black;
     font-size: 10pt;
     font-style: italic;
