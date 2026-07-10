@@ -14,4 +14,12 @@ const days = defineCollection({
   }),
 });
 
-export const collections = { days };
+const pages = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/pages" }),
+  schema: z.object({
+    title: z.string().optional(),
+    attribution: z.string().optional(),
+  }),
+});
+
+export const collections = { days, pages };

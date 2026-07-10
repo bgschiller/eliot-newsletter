@@ -100,13 +100,20 @@ h2 {
 
 /* --- Links --- */
 a {
-  color: var(--color-accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
+  text-decoration: none;
+  color: var(--color-text);
 }
-a:hover {
-  color: var(--color-accent-light);
+
+@media screen {
+  a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+  }
+  a:hover {
+    color: var(--color-accent-light);
+  }
 }
 
 /* ============================================
