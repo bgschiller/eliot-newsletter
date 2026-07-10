@@ -1,0 +1,14 @@
+---
+export interface Props {
+  title: string;
+  attribution?: string;
+}
+
+const { title, attribution } = Astro.props;
+---
+
+<article class="article">
+  <h2>{title}</h2>
+  <slot />
+  {attribution && <p class="credit">—<em>{attribution}</em></p>}
+</article>

@@ -124,6 +124,11 @@ a:hover {
   margin-bottom: 1.5rem;
 }
 
+/* Prevent articles from splitting across columns */
+.article {
+  break-inside: avoid-column;
+}
+
 /* --- Schedule: base visual styles --- */
 .schedule {
   background: var(--color-schedule-bg);
@@ -394,6 +399,10 @@ main > p.credit {
     margin-top: 0;
   }
 
+  .article {
+    break-inside: avoid-column;
+  }
+
   /* Body text */
   main p {
     font-size: var(--print-body-size, 11pt);
@@ -439,12 +448,21 @@ main > p.credit {
     margin: 0 0.5em;
   }
 
+  .important-numbers br {
+    display: none;
+  }
+
+  .important-numbers li.chaplain {
+    display: block;
+  }
+
   .important-numbers li::after {
     content: " · ";
     color: #999;
   }
 
-  .important-numbers li:last-child::after {
+  .important-numbers li:last-child::after,
+  .important-numbers li:nth-last-child(2)::after {
     content: none;
   }
 

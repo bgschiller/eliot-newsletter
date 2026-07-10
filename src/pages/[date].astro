@@ -5,6 +5,7 @@ import Timeslot from "../components/Timeslot.astro";
 import AuthorCredit from "../components/AuthorCredit.astro";
 import ColumnRow from "../components/ColumnRow.astro";
 import Footer from "../components/Footer.astro";
+import Article from "../components/Article.astro";
 
 export async function getStaticPaths() {
   const days = await getCollection('days');
@@ -68,7 +69,7 @@ const printCssVars = printScheduleSize ? `
       <a href="/">&larr; Current Issue</a>
     </nav>
     <main class="page-layout">
-      <Content components={{ Schedule, Timeslot, AuthorCredit, ColumnRow }} />
+      <Content components={{ Schedule, Timeslot, AuthorCredit, ColumnRow, Article }} />
     </main>
     <Footer />
 

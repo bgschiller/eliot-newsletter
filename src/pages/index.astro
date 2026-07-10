@@ -5,6 +5,7 @@ import Timeslot from "../components/Timeslot.astro";
 import AuthorCredit from "../components/AuthorCredit.astro";
 import ColumnRow from "../components/ColumnRow.astro";
 import Footer from "../components/Footer.astro";
+import Article from "../components/Article.astro";
 
 const days = await getCollection('days')
 const nonDraft = days.filter(d => !d.data.draft)
@@ -54,7 +55,7 @@ const printCssVars = printScheduleSize ? `
 			<p class="page-subtitle">{dateStr}</p>
 		</header>
 		<main class="page-layout">
-			<Content components={{ Schedule, Timeslot, AuthorCredit, ColumnRow }} />
+			<Content components={{ Schedule, Timeslot, AuthorCredit, ColumnRow, Article }} />
 		</main>
 		{priorDays.length > 0 && (
 			<nav class="prior-issues">
