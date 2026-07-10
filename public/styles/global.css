@@ -407,6 +407,21 @@ main > p.credit {
     color: #666;
     border-top: 0.5pt solid #ccc;
   }
+
+  /* Draft watermark — appears on every page in dev or when draft:true */
+  body[data-dev="true"]::after,
+  body[data-draft="true"]::after {
+    content: "DRAFT";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-family: var(--font-body);
+    font-size: 84pt;
+    color: rgba(0, 0, 0, 0.06);
+    pointer-events: none;
+    z-index: 1000;
+  }
 }
 
 /* --- Motion --- */

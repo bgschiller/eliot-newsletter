@@ -8,7 +8,7 @@ import ColumnRow from "../components/ColumnRow.astro";
 export async function getStaticPaths() {
   const days = await getCollection('days');
   return days
-    .filter(d => !d.data.draft)
+    .filter(d => import.meta.env.DEV || !d.data.draft)
     .map(d => ({
       params: { date: d.data.date.toISOString().split('T')[0] },
     }));
@@ -58,7 +58,7 @@ const printCssVars = printScheduleSize ? `
     <link rel="stylesheet" href="/styles/global.css" />
     {printCssVars && <style is:inline set:html={printCssVars} />}
   </head>
-  <body data-date={isoDate}>
+  <body data-date={isoDate} data-draft={String(day.data.draft)} data-dev={String(import.meta.env.DEV)}>
     <header class="page-header">
       <img class="nameplate" src="/the-daily-thread.svg" alt="The Daily Thread" />
       <p class="page-subtitle">{dateStr}</p>

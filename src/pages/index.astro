@@ -47,7 +47,7 @@ const printCssVars = printScheduleSize ? `
 		<link rel="stylesheet" href="/styles/global.css" />
 		{printCssVars && <style is:inline set:html={printCssVars} />}
 	</head>
-	<body data-date={isoDate}>
+	<body data-date={isoDate} data-draft={String(latest.data.draft)} data-dev={String(import.meta.env.DEV)}>
 		<header class="page-header">
 			<img class="nameplate" src="/the-daily-thread.svg" alt="The Daily Thread" />
 			<p class="page-subtitle">{dateStr}</p>
