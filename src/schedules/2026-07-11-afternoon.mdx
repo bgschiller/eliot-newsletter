@@ -1,0 +1,81 @@
+import Schedule from "../components/Schedule.astro"
+import Timeslot from "../components/Timeslot.astro"
+
+<Schedule day="today">
+  <h2>Saturday, July 11</h2>
+  <Timeslot start="2:30">
+    <li>
+      Check-In <span class="loc">Juniper, to 6:00</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="3:30">
+    <li>
+      Staff Meeting <span class="loc">Lower Colman, to 4:30</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="4:45">
+    <li>
+      Newcomers Orientation <span class="loc">Meeting House, to 5:45</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="5:00">
+    <li>
+      Small Group Facilitators Meeting{" "}
+      <span class="loc">Upper Pines, to 6:00</span>
+    </li>
+    <li>
+      Lifeguards Meeting <span class="loc">Swim Dock, to 5:30</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="5:30">
+    <li>
+      Golf Cart Volunteer Orientation{" "}
+      <span class="loc">Eliot Pavilion, to 6:00</span>
+    </li>
+    <li>
+      First Aid Volunteer Orientation{" "}
+      <span class="loc">Inn Porch, to 6:00</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="6" bold>
+    <li>
+      Dinner <span class="loc">Inn</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="7">
+    <li>
+      All Camp Orientation <span class="loc">Meeting House, to 8:00</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="8">
+    <li>
+      Children's/MAGs Orientation{" "}
+      <span class="loc">Meeting House/Lawn, to 8:30</span>
+    </li>
+    <li>
+      Youth and Parent/Sponsor Orientation{" "}
+      <span class="loc">Lower Pines, to 8:30</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="8:45">
+    <li>
+      House Meetings <span class="loc">to 9:15</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="9:15">
+    <li>
+      Young Adults <span class="loc">Spruce</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="10" bold>
+    <li>Quiet Hours</li>
+    <li>
+      Coffeehouse <span class="loc">Rhododendron, to 11:00</span>
+    </li>
+  </Timeslot>
+  <Timeslot start="11">
+    <li>
+      Youth Late Night <span class="loc">Lower Pines, to 1:00</span>
+    </li>
+  </Timeslot>
+</Schedule>

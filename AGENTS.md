@@ -27,7 +27,7 @@ Both web and print use **CSS Multi-Column** (`column-count: 2`) inside `<ColumnR
 
 ## Content Model
 
-Each day's MDX has a `<ColumnRow>` for each page. Schedule comes first, then articles:
+Each day's MDX imports schedules from separate files and contains articles in `<ColumnRow>` wrappers:
 
 ```mdx
 ---
@@ -36,49 +36,27 @@ draft: true
 printScheduleSize: 10
 printBodySize: 11
 printHeadingSize: 16
-printPage1Articles: 2
 ---
+import AfternoonSchedule from "../schedules/2026-07-16-afternoon.mdx"
+import MorningSchedule from "../schedules/2026-07-17-morning.mdx"
 
 <ColumnRow>
-<Schedule day="today">
-  <h2>Thursday, July 16</h2>
-  <Timeslot start="6:00" bold>...</Timeslot>
-  ...
-</Schedule>
-
-## Article 1
-...
-
-## Article 2
-...
+  <Article title="Article 1">...</Article>
+  <AfternoonSchedule />
+  <Article title="Article 2">...</Article>
 </ColumnRow>
 
 <ColumnRow>
-<Schedule day="tomorrow">
-  <h2>Friday, July 17</h2>
-  ...
-</Schedule>
-
-## Article 3
-...
+  <MorningSchedule />
+  <Article title="Article 3">...</Article>
 </ColumnRow>
 ```
 
-- **Schedule blocks:** `<Schedule day="today">` (afternoon/evening) and `<Schedule day="tomorrow">` (following day). Each contains `<Timeslot>` children with `<li>` events.
-- **Article order within each ColumnRow is manual.** Move articles between ColumnRows to balance the print layout visually.
-- **`printPage1Articles`** is computed by `pnpm measure` as a measurement hint. It's informative only — the actual split is determined by the `<ColumnRow>` boundaries you place.
+- **Schedule files** live in `src/schedules/`, named by date: `{date}-afternoon.mdx` (today's schedule) and `{next-date}-morning.mdx` (tomorrow's schedule). Each contains a single `<Schedule>` block with `<Timeslot>` children.
+- **Articles** use `<Article>` components. Article order within each ColumnRow is manual — move them to balance the print layout visually.
+- **Print font sizes** (`printScheduleSize`, `printBodySize`, `printHeadingSize`) are set manually in frontmatter per day.
 
 ## Build Tools
-
-### `pnpm measure`
-
-Runs `scripts/measure-print.ts`. For each MDX file:
-- Measures schedule/article heights using `@chenglou/pretext` + `node-canvas`
-- Computes optimal font sizes for print (`printScheduleSize`, `printBodySize`, `printHeadingSize`)
-- Computes `printPage1Articles` as a hint
-- Writes these values to frontmatter
-
-Does **not** modify the MDX body. ColumnRow boundaries are your responsibility.
 
 ### `pnpm print-preview`
 
@@ -111,7 +89,6 @@ Standard Astro commands. The Vite plugin in `astro.config.mjs` (conditionally lo
 | `src/pages/index.astro` | Home page (latest non-draft) |
 | `src/pages/[date].astro` | Per-day page |
 | `src/content.config.ts` | Content collection schema |
-| `scripts/measure-print.ts` | Font size + article split measurement |
 | `scripts/print-preview.ts` | Live PDF preview tool |
 | `public/styles/global.css` | All styles (screen + print + mobile) |
 | `astro.config.mjs` | Astro config + print-preview Vite plugin |

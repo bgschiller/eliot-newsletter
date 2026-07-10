@@ -1,0 +1,30 @@
+import Schedule from "../components/Schedule.astro"
+import Timeslot from "../components/Timeslot.astro"
+
+<Schedule day="today">
+  <h2>Monday, July 13</h2>
+  <Timeslot start="6:00" bold>
+    <li>Dinner <span class="loc">Inn</span></li>
+  </Timeslot>
+  <Timeslot start="6:50">
+    <li>Firelight Head Start for Littles <span class="loc">Firelight Circle, to 7:00</span></li>
+  </Timeslot>
+  <Timeslot start="7:00">
+    <li>Firelight <span class="loc">Firelight Circle, to 7:45</span></li>
+    <li>Board &amp; Card Games <span class="loc">Juniper, to 10:00</span></li>
+  </Timeslot>
+  <Timeslot start="8:00">
+    <li>PEP Talks <span class="loc">Meeting House, to 9:00</span></li>
+  </Timeslot>
+  <Timeslot start="9:15">
+    <li>Worship <span class="loc">Meeting House, to 9:45</span></li>
+  </Timeslot>
+  <Timeslot start="10:00" bold>
+    <li>Quiet Hours <span class="loc">Seabeck Campus</span></li>
+    <li>Coffeehouse <span class="loc">Rhododendron, to 11:00</span></li>
+    <li>Young Adult Meeting <span class="loc">Spruce</span></li>
+  </Timeslot>
+  <Timeslot start="11:00">
+    <li>Youth Late Night <span class="loc">Lower Pines, to 1:00</span></li>
+  </Timeslot>
+</Schedule>
