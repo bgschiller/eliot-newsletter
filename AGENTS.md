@@ -37,22 +37,22 @@ printScheduleSize: 10
 printBodySize: 11
 printHeadingSize: 16
 ---
-import AfternoonSchedule from "../schedules/2026-07-16-afternoon.mdx"
-import MorningSchedule from "../schedules/2026-07-17-morning.mdx"
+import TodaySchedule from "../schedules/2026-07-16-late.mdx"
+import TomorrowSchedule from "../schedules/2026-07-17-early.mdx"
 
 <ColumnRow>
   <Article title="Article 1">...</Article>
-  <AfternoonSchedule />
+  <TodaySchedule />
   <Article title="Article 2">...</Article>
 </ColumnRow>
 
 <ColumnRow>
-  <MorningSchedule />
+  <TomorrowSchedule />
   <Article title="Article 3">...</Article>
 </ColumnRow>
 ```
 
-- **Schedule files** live in `src/schedules/`, named by date: `{date}-afternoon.mdx` (today's schedule) and `{next-date}-morning.mdx` (tomorrow's schedule). Each contains a single `<Schedule>` block with `<Timeslot>` children.
+- **Schedule files** live in `src/schedules/`, named by date: `{date}-late.mdx` (today's schedule) and `{next-date}-early.mdx` (tomorrow's schedule). Each contains a single `<Schedule>` block with `<Timeslot>` children.
 - **Articles** use `<Article>` components. Article order within each ColumnRow is manual — move them to balance the print layout visually.
 - **Print font sizes** (`printScheduleSize`, `printBodySize`, `printHeadingSize`) are set manually in frontmatter per day.
 
