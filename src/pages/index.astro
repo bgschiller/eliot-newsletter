@@ -4,6 +4,7 @@ import Schedule from "../components/Schedule.astro";
 import Timeslot from "../components/Timeslot.astro";
 import AuthorCredit from "../components/AuthorCredit.astro";
 import ColumnRow from "../components/ColumnRow.astro";
+import Footer from "../components/Footer.astro";
 
 const days = await getCollection('days')
 const nonDraft = days.filter(d => !d.data.draft)
@@ -72,7 +73,7 @@ const printCssVars = printScheduleSize ? `
 				</ul>
 			</nav>
 		)}
-		<footer class="page-footer">{dateStr} — Eliot Compass</footer>
+		<Footer />
 		<script>
 			// Grey out events that have already occurred
 			(function() {

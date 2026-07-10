@@ -234,8 +234,30 @@ main > p.credit {
   font-style: italic;
 }
 
-/* --- Page Footer (visible in print only) --- */
+/* --- Page Footer --- */
 .page-footer {
+  margin-top: 2em;
+  padding: 1em 0;
+  border-top: 1pt solid #ccc;
+  font-size: 0.85em;
+  color: #555;
+}
+
+.important-numbers {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.important-numbers li {
+  margin-bottom: 0.35em;
+}
+
+.important-numbers li strong {
+  color: #333;
+}
+
+.web-edition {
   display: none;
 }
 
@@ -396,16 +418,45 @@ main > p.credit {
 
   /* Page footer */
   .page-footer {
-    display: block;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    font-size: 8pt;
+    font-size: 7pt;
     text-align: center;
-    padding: 3pt 0;
-    color: #666;
+    padding: 3pt 0 2pt 0;
+    color: #333;
     border-top: 0.5pt solid #ccc;
+  }
+
+  .important-numbers {
+    margin: 0;
+    padding: 0;
+  }
+
+  .important-numbers li {
+    display: inline;
+    margin: 0 0.5em;
+  }
+
+  .important-numbers li::after {
+    content: " · ";
+    color: #999;
+  }
+
+  .important-numbers li:last-child::after {
+    content: none;
+  }
+
+  .web-edition {
+    display: block;
+    margin-top: 2pt;
+    font-style: italic;
+  }
+
+  .web-edition a {
+    color: #333;
+    text-decoration: none;
   }
 
   /* Draft watermark — appears on every page in dev or when draft:true */
