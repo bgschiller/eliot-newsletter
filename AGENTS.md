@@ -4,7 +4,7 @@
 
 - **Nameplate** (SVG centered, date pinned right) spans full width on page 1 only. Footer on both pages.
 - **Page 1, right column:** afternoon/evening schedule for the issue date (floats right at the top). Articles wrap around it in the left space.
-- **Page 2, right column:** following day's schedule (floats right at the top). Remaining articles wrap around in the left space.
+- **Page 2, right column:** following day's schedule. Remaining articles wrap around in the left space.
 - Articles fill all available space — they wrap beside and below the schedule on each page, not restricted to rigid column boundaries.
 
 ## Web Edition

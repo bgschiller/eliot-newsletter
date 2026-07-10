@@ -3,6 +3,7 @@ import { render, getCollection } from "astro:content";
 import Schedule from "../components/Schedule.astro";
 import Timeslot from "../components/Timeslot.astro";
 import AuthorCredit from "../components/AuthorCredit.astro";
+import ColumnRow from "../components/ColumnRow.astro";
 
 const days = await getCollection('days')
 const nonDraft = days.filter(d => !d.data.draft)
@@ -52,7 +53,7 @@ const printCssVars = printScheduleSize ? `
 			<p class="page-subtitle">{dateStr}</p>
 		</header>
 		<main class="page-layout">
-			<Content components={{ Schedule, Timeslot, AuthorCredit }} />
+			<Content components={{ Schedule, Timeslot, AuthorCredit, ColumnRow }} />
 		</main>
 		{priorDays.length > 0 && (
 			<nav class="prior-issues">

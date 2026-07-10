@@ -113,29 +113,39 @@ a:hover {
    PAGE LAYOUT (Screen)
    ============================================ */
 
-.page-layout {
-  display: block;
-}
-
 .page-layout h2 {
   break-after: avoid;
 }
 
-/* --- Schedule — Screen Default (mobile: full-width card) --- */
+/* --- Two-column rows --- */
+.column-row {
+  column-count: 2;
+  column-gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Schedule: base visual styles --- */
 .schedule {
   background: var(--color-schedule-bg);
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 1rem 1.125rem;
-  margin: 0 0 1rem 1rem;
+  margin: 0 0 1rem 0;
 }
 
-/* --- Schedule: desktop — float right so articles wrap beside it --- */
-@media screen and (min-width: 48rem) {
-  .schedule {
-    float: right;
-    width: 24rem;
-    margin: 0 0 1rem 1.75rem;
+/* --- Schedule inside column-row: push to column 2 --- */
+.column-row .schedule {
+  break-before: column;
+  break-inside: avoid;
+}
+
+/* --- Mobile: collapse to single column --- */
+@media screen and (max-width: 48rem) {
+  .column-row {
+    column-count: 1;
+  }
+  .column-row .schedule {
+    break-before: auto;
   }
 }
 
@@ -288,16 +298,21 @@ main > p.credit {
     display: none;
   }
 
-  /* Schedule: floats right so articles wrap beside/below it */
+  /* Column-rows: persistent two-column flow; second row starts new page */
+  .column-row {
+    margin-bottom: 0;
+  }
+  .column-row + .column-row {
+    break-before: page;
+  }
+
+  /* Schedule: strip visual chrome but keep in column flow */
   .schedule {
-    float: right;
-    width: 45%;
-    margin-left: 5%;
-    margin-bottom: 10pt;
     background: none;
     border: none;
     border-radius: 0;
     padding: 0;
+    margin: 0 0 10pt 0;
   }
 
   .schedule h2 {

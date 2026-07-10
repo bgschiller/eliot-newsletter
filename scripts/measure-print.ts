@@ -2,11 +2,15 @@
  * Build-time print size measurement using @chenglou/pretext + node-canvas.
  *
  * Layout model:
- *   Schedules float right (45%w), articles wrap around them.
- *   Page breaks are placed manually in MDX by the editor.
+ *   Web: two ColumnRow wrappers, each with column-count: 2.
+ *        Today's schedule in row 1 col 2, articles wrap beside/below.
+ *        Tomorrow's schedule in row 2 col 2, rest of articles wrap beside/below.
+ *   Print: same ColumnRow structure with two-column flow.
+ *          Row 2 gets a page break.
  *
- * Each schedule must fit in one page height. Articles are measured at
- * full page width (they flow beside and below the schedule).
+ * This script measures content and computes optimal font sizes.
+ * ColumnRow boundaries are placed manually by editors in the MDX.
+ * printPage1Articles is computed as a measurement hint only.
  *
  * Run: pnpm measure
  */
@@ -72,8 +76,11 @@ function extractTimeslots(raw: string): TimeslotBlock[] {
 
 function extractArticles(raw: string): Article[] {
   const articles: Article[] = [];
-  // Strip Schedule blocks so we only parse articles
-  const withoutSchedules = raw.replace(/<Schedule[^>]*>[\s\S]*?<\/Schedule>/g, '');
+  // Strip frontmatter (--- ... ---) then wrapper/Schedule tags
+  const body = raw.split('---').slice(2).join('---');
+  const withoutSchedules = body
+    .replace(/<\/?ColumnRow>/g, '')
+    .replace(/<Schedule[^>]*>[\s\S]*?<\/Schedule>/g, '');
   const sections = withoutSchedules.split(/^##\s+/m).filter(Boolean);
   for (const section of sections) {
     const lines = section.split('\n');
@@ -112,10 +119,9 @@ function measureSchedule(blocks: TimeslotBlock[], sizePt: number): number {
     for (const event of blocks[i].events) {
       total += measureHeight(event, sizePt, SCHEDULE_W);
     }
-    if (i < blocks.length - 1) total += 1.5; // gap between timeslots
+    if (i < blocks.length - 1) total += 1.5;
   }
-  // Add heading height
-  total += sizePt * LINE_H_RATIO;
+  total += sizePt * LINE_H_RATIO; // heading height
   return total;
 }
 
@@ -145,9 +151,34 @@ function findBestSize(
   return Math.round(lo * 10) / 10;
 }
 
+// ── Article split computation ────────────────────────────────────
+
+function computeArticleSplit(
+  articles: Article[],
+  bodySize: number,
+  headingSize: number,
+): number {
+  if (articles.length === 0) return 0;
+
+  // Articles flow beside the schedule (narrow column) then below it (full width).
+  // As a heuristic: measure at full PAGE_W and allocate PAGE_H per page.
+  let cumulative = 0;
+  for (let i = 0; i < articles.length; i++) {
+    const h = measureArticleHeight(articles[i], bodySize, headingSize, PAGE_W);
+    if (cumulative + h > PAGE_H && i > 0) {
+      return i; // articles 0..i-1 on page 1, i..end on page 2
+    }
+    cumulative += h;
+  }
+  return articles.length; // all fit on page 1
+}
+
 // ── Frontmatter ──────────────────────────────────────────────────
 
-function updateFrontmatter(raw: string, sizes: { scheduleSize: number; bodySize: number; headingSize: number }): string {
+function updateFrontmatter(
+  raw: string,
+  sizes: { scheduleSize: number; bodySize: number; headingSize: number; printPage1Articles: number },
+): string {
   const parts = raw.split('---');
   if (parts.length < 3) return raw;
   let fm = parts[1]
@@ -159,6 +190,7 @@ function updateFrontmatter(raw: string, sizes: { scheduleSize: number; bodySize:
   fm += `\nprintScheduleSize: ${sizes.scheduleSize}`;
   fm += `\nprintBodySize: ${sizes.bodySize}`;
   fm += `\nprintHeadingSize: ${sizes.headingSize}`;
+  fm += `\nprintPage1Articles: ${sizes.printPage1Articles}`;
   return `---${fm}\n---${parts.slice(2).join('---')}`;
 }
 
@@ -188,17 +220,23 @@ async function main() {
       scheduleSize = findBestSize(allBlocks, TARGET_SCHEDULE, PAGE_H, SCHEDULE_W);
     }
 
-    // Article sizes — measured at full page width since they wrap around schedule
+    // Article sizes — measured at full page width
     let bodySize = TARGET_BODY;
     let headingSize = TARGET_HEADING;
     const totalColSpace = 2 * PAGE_H; // two pages
-    const totalH = articles.reduce((sum, a) => sum + measureArticleHeight(a, TARGET_BODY, TARGET_HEADING, PAGE_W), 0);
+    const totalH = articles.reduce(
+      (sum, a) => sum + measureArticleHeight(a, TARGET_BODY, TARGET_HEADING, PAGE_W),
+      0,
+    );
 
     if (totalH > totalColSpace) {
       let bestBody = 7;
       for (let tryBody = 1; tryBody <= TARGET_BODY; tryBody += 0.25) {
         const tryH = tryBody * 1.45;
-        const th = articles.reduce((sum, a) => sum + measureArticleHeight(a, tryBody, tryH, PAGE_W), 0);
+        const th = articles.reduce(
+          (sum, a) => sum + measureArticleHeight(a, tryBody, tryH, PAGE_W),
+          0,
+        );
         if (th <= totalColSpace) bestBody = tryBody;
         else break;
       }
@@ -206,12 +244,21 @@ async function main() {
       headingSize = Math.round(bestBody * 1.45 * 10) / 10;
     }
 
-    const updated = updateFrontmatter(raw, { scheduleSize, bodySize, headingSize });
+    // Compute article split for print pages (measurement hint only)
+    const splitIdx = computeArticleSplit(articles, bodySize, headingSize);
+
+    const updated = updateFrontmatter(raw, {
+      scheduleSize,
+      bodySize,
+      headingSize,
+      printPage1Articles: splitIdx,
+    });
     writeFileSync(filePath, updated, 'utf-8');
 
     console.log(`📐 ${file}:`);
     console.log(`   Schedule: ${scheduleSize}pt (today ${today.length} + tomorrow ${tomorrow.length} blocks)`);
     console.log(`   Body:     ${bodySize}pt, Heading: ${headingSize}pt`);
+    console.log(`   Page 1:   ${splitIdx} of ${articles.length} articles`);
   }
 }
 
