@@ -440,7 +440,7 @@ main > p.credit {
     right: 0;
     font-size: 7pt;
     text-align: center;
-    padding: 3pt 0 2pt 0;
+    padding: 3pt 0 0 0;
     color: #333;
     border-top: 0.5pt solid #ccc;
   }
