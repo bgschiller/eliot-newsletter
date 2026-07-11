@@ -134,6 +134,7 @@ a {
 /* Prevent articles from splitting across columns */
 .article {
   break-inside: avoid-column;
+  margin-bottom: 0.8em;
 }
 
 /* --- Schedule: base visual styles --- */
@@ -240,7 +241,6 @@ main > p > em {
 /* Standalone credit: paragraph that is just em-dash + em */
 main > p.credit {
   margin-top: 0.1em;
-  margin-bottom: 0.8em;
   color: var(--color-muted);
   font-size: 0.9em;
   font-style: italic;
