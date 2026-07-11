@@ -226,6 +226,9 @@ a {
 main p {
   margin-bottom: 0.55em;
 }
+.article ul {
+  margin-left: 1.5em;
+}
 em {
   font-style: italic;
 }
@@ -416,6 +419,9 @@ main > p.credit {
     margin-bottom: 0;
     orphans: 3;
     widows: 3;
+  }
+  .article ul {
+    margin-left: 2em;
   }
 
   /* Author credits */
