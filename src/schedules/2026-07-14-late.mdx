@@ -1,31 +1,54 @@
-import Schedule from "../components/Schedule.astro"
-import Timeslot from "../components/Timeslot.astro"
+import Schedule from "../components/Schedule.astro";
+import Timeslot from "../components/Timeslot.astro";
 
-<Schedule day="today">
+<Schedule type="late" day="today">
   <h2>Tuesday, July 14</h2>
   <Timeslot start="6" bold>
-    <li>Dinner <span class="loc">Inn</span></li>
+    <li>
+      Dinner <span class="loc">Inn</span>
+    </li>
   </Timeslot>
   <Timeslot start="6:50">
-    <li>Firelight Head Start for Littles <span class="loc">Firelight Circle, to 7:00</span></li>
+    <li>
+      Firelight Head Start for Littles{" "}
+      <span class="loc">Firelight Circle, to 7:00</span>
+    </li>
   </Timeslot>
   <Timeslot start="7">
-    <li>Firelight <span class="loc">Firelight Circle, to 7:45</span></li>
-    <li>Board &amp; Card Games <span class="loc">Juniper, to 10:00</span></li>
+    <li>
+      Firelight <span class="loc">Firelight Circle, to 7:45</span>
+    </li>
+    <li>
+      Board &amp; Card Games <span class="loc">Juniper, to 10:00</span>
+    </li>
   </Timeslot>
   <Timeslot start="8">
-    <li>Trivia Tuesday <span class="loc">Meeting House, to 9:00</span></li>
-    <li>Sing-Along <span class="loc">Inn Porch, to 9:00</span></li>
+    <li>
+      Trivia Tuesday <span class="loc">Meeting House, to 9:00</span>
+    </li>
+    <li>
+      Sing-Along <span class="loc">Inn Porch, to 9:00</span>
+    </li>
   </Timeslot>
   <Timeslot start="9:15">
-    <li>Worship — Remembrances <span class="loc">Meeting House, to 10:00</span></li>
+    <li>
+      Worship — Remembrances <span class="loc">Meeting House, to 10:00</span>
+    </li>
   </Timeslot>
   <Timeslot start="10" bold>
-    <li>Quiet Hours <span class="loc">Seabeck Campus</span></li>
-    <li>Coffeehouse <span class="loc">Rhododendron, to 11:00</span></li>
-    <li>Young Adult Meeting <span class="loc">Spruce</span></li>
+    <li>
+      Quiet Hours <span class="loc">Seabeck Campus</span>
+    </li>
+    <li>
+      Coffeehouse <span class="loc">Rhododendron, to 11:00</span>
+    </li>
+    <li>
+      Young Adult Meeting <span class="loc">Spruce</span>
+    </li>
   </Timeslot>
   <Timeslot start="11">
-    <li>Youth Late Night <span class="loc">Lower Pines, to 1:00</span></li>
+    <li>
+      Youth Late Night <span class="loc">Lower Pines, to 1:00</span>
+    </li>
   </Timeslot>
 </Schedule>

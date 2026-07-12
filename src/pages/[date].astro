@@ -72,6 +72,74 @@ const printCssVars = printScheduleSize ? `
       <Content components={{ Schedule, Timeslot, AuthorCredit, ColumnRow, Article }} />
     </main>
     <Footer />
+    <script>
+			// Grey out events that have already occurred
+			(function() {
+				const pageDateStr = document.body.dataset.date;
+				if (!pageDateStr) return;
+				const pageYear = parseInt(pageDateStr.split('-')[0]);
+
+				const monthNames = ['January','February','March','April','May','June',
+					'July','August','September','October','November','December'];
+
+				function parseHeadingDate(h2) {
+					const text = h2.textContent.trim();
+					const match = text.match(/(\w+)\s+(\d{1,2})/);
+					if (!match) return null;
+					const monthIdx = monthNames.indexOf(match[1]);
+					if (monthIdx === -1) return null;
+					return { month: monthIdx, day: parseInt(match[2]) };
+				}
+
+				function parseTimeToMinutes(timeStr) {
+					if (timeStr === 'noon' || timeStr === 'Noon') return 12 * 60;
+					const [h, m] = timeStr.split(':').map(Number);
+					return h * 60 + (m || 0);
+				}
+
+				function greyOutSchedule(scheduleEl) {
+					const scheduleType = scheduleEl.dataset.scheduleType || 'late';
+					let currentDayDate = null;
+					let prevMinutes = null;
+					let hasSeenNoon = false;
+
+					const children = scheduleEl.children;
+					for (let i = 0; i < children.length; i++) {
+						const el = children[i];
+						if (el.nodeName === 'H2') {
+							currentDayDate = parseHeadingDate(el);
+							prevMinutes = null;
+							hasSeenNoon = false;
+							continue;
+						}
+						if (!el.classList || !el.classList.contains('timeslot')) continue;
+						if (!currentDayDate) continue;
+						const timeEl = el.querySelector('.time');
+						if (!timeEl) continue;
+						const timeMinutes = parseTimeToMinutes(timeEl.textContent.trim());
+						let isPM = false, isNextDay = false;
+						if (timeMinutes >= 12 * 60 && timeMinutes < 13 * 60) {
+							isPM = true; hasSeenNoon = true;
+						} else if (timeMinutes >= 1 * 60 && timeMinutes < 6 * 60) {
+							isNextDay = prevMinutes !== null && prevMinutes >= 23 * 60;
+							if (!isNextDay) isPM = true;
+						} else if (timeMinutes >= 6 * 60 && timeMinutes < 12 * 60) {
+							// Late schedule: all evening times are PM (never has AM).
+							// Early schedule: needs to have passed noon to be PM.
+							if (scheduleType === 'late' || hasSeenNoon) isPM = true;
+						}
+						let hours = Math.floor(timeMinutes / 60);
+						if (isPM && hours < 12) hours += 12;
+						const eventDate = new Date(pageYear, currentDayDate.month, currentDayDate.day, hours, timeMinutes % 60);
+						if (isNextDay) eventDate.setDate(eventDate.getDate() + 1);
+						if (eventDate.getTime() < Date.now()) el.classList.add('past');
+						prevMinutes = timeMinutes;
+					}
+				}
+
+				document.querySelectorAll('.schedule--today, .schedule--tomorrow').forEach(greyOutSchedule);
+			})();
+		</script>
 
   </body>
 </html>

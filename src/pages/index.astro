@@ -101,6 +101,7 @@ const printCssVars = printScheduleSize ? `
 				}
 
 				function greyOutSchedule(scheduleEl) {
+					const scheduleType = scheduleEl.dataset.scheduleType || 'late';
 					let currentDayDate = null;
 					let prevMinutes = null;
 					let hasSeenNoon = false;
@@ -126,7 +127,9 @@ const printCssVars = printScheduleSize ? `
 							isNextDay = prevMinutes !== null && prevMinutes >= 23 * 60;
 							if (!isNextDay) isPM = true;
 						} else if (timeMinutes >= 6 * 60 && timeMinutes < 12 * 60) {
-							if (hasSeenNoon) isPM = true;
+							// Late schedule: all evening times are PM (never has AM).
+							// Early schedule: needs to have passed noon to be PM.
+							if (scheduleType === 'late' || hasSeenNoon) isPM = true;
 						}
 						let hours = Math.floor(timeMinutes / 60);
 						if (isPM && hours < 12) hours += 12;
