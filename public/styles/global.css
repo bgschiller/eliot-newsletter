@@ -128,7 +128,6 @@ a {
 .column-row {
   column-count: 2;
   column-gap: 2rem;
-  column-fill: auto;
   margin-bottom: 1.5rem;
 }
 
