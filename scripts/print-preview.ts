@@ -2,7 +2,7 @@
  * print-preview — live print layout iteration for Eliot Newsletter.
  *
  * Spawns astro dev, watches for MDX rebuilds, regenerates a PDF,
- * and opens it in Preview.app (which auto-refreshes on file change).
+ * and opens/refreshes Preview.app via osascript on each rebuild.
  *
  * Usage:
  *   pnpm print-preview               # latest non-draft day
@@ -95,6 +95,8 @@ async function generatePdf(pageUrl: string, pdfPath: string): Promise<void> {
   const page = await context.newPage();
 
   await page.goto(pageUrl, { waitUntil: 'networkidle' });
+  // Extra settling time — networkidle can resolve before Astro HMR finishes
+  await page.waitForTimeout(2000);
   await page.emulateMedia({ media: 'print' });
   await page.pdf({
     path: pdfPath,
@@ -104,6 +106,13 @@ async function generatePdf(pageUrl: string, pdfPath: string): Promise<void> {
 
   await browser.close();
   console.log(`  ✓ PDF written to ${pdfPath}`);
+
+  // Force Preview to refresh — auto-reload on file change is unreliable
+  const absPath = join(process.cwd(), pdfPath);
+  execSync(
+    `osascript -e 'tell application "Preview" to activate' -e 'tell application "Preview" to open POSIX file "${absPath}"'`,
+    { stdio: 'ignore' },
+  );
 }
 
 // ── Main ─────────────────────────────────────────────────────────
@@ -142,9 +151,6 @@ async function main() {
 
     // Touch marker so watcher has something to observe
     writeFileSync(MARKER, Date.now().toString());
-
-    // Open in Preview.app (auto-refreshes on file change)
-    execSync(`open -a Preview "${pdfPath}"`);
 
     // Watch the marker file (polling — reliable on macOS)
     let debounce: ReturnType<typeof setTimeout> | undefined;

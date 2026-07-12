@@ -11,9 +11,10 @@ function printPreviewPlugin() {
       server.watcher.on("change", (path) => {
         if (!path.endsWith(".mdx")) return;
         if (!existsSync(".pi")) mkdirSync(".pi");
+        // Give Astro time to finish rebuilding before triggering
         setTimeout(() => {
           writeFileSync(".pi/print-rebuild-trigger", Date.now().toString());
-        }, 100);
+        }, 2000);
       });
     },
   };

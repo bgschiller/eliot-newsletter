@@ -445,7 +445,7 @@ main > p.credit {
     left: 0;
     right: 0;
     font-size: 7pt;
-    text-align: center;
+    text-align: left;
     padding: 3pt 0 0 0;
     color: #333;
     border-top: 0.5pt solid #ccc;
@@ -454,29 +454,16 @@ main > p.credit {
   .important-numbers {
     margin: 0;
     padding: 0;
+    column-count: 2;
+    column-gap: 1em;
   }
 
   .important-numbers li {
-    display: inline;
-    margin: 0 0.5em;
+    margin-bottom: 0.2em;
   }
 
   .important-numbers br {
     display: none;
-  }
-
-  .important-numbers li.chaplain {
-    display: block;
-  }
-
-  .important-numbers li::after {
-    content: " · ";
-    color: #999;
-  }
-
-  .important-numbers li:last-child::after,
-  .important-numbers li:nth-last-child(2)::after {
-    content: none;
   }
 
   .web-edition {
