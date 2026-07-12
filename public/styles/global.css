@@ -152,6 +152,10 @@ a {
   break-inside: avoid;
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
 /* --- Mobile: collapse to single column --- */
 @media screen and (max-width: 48rem) {
   .column-row {
@@ -468,8 +472,6 @@ main > p.credit {
 
   .web-edition {
     display: block;
-    margin-top: 2pt;
-    font-style: italic;
   }
 
   .web-edition a {
