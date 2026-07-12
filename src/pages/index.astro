@@ -97,7 +97,7 @@ const printCssVars = printScheduleSize ? `
 				function parseTimeToMinutes(timeStr) {
 					if (timeStr === 'noon' || timeStr === 'Noon') return 12 * 60;
 					const [h, m] = timeStr.split(':').map(Number);
-					return h * 60 + m;
+					return h * 60 + (m || 0);
 				}
 
 				function greyOutSchedule(scheduleEl) {
