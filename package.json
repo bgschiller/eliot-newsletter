@@ -2,6 +2,9 @@
   "name": "",
   "type": "module",
   "version": "0.0.1",
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp"]
+  },
   "engines": {
     "node": ">=22.12.0"
   },
