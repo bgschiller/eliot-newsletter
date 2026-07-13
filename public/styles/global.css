@@ -128,6 +128,7 @@ a {
 .column-row {
   column-count: 2;
   column-gap: 2rem;
+  column-fill: auto;
   margin-bottom: 1.5rem;
 }
 
@@ -148,7 +149,6 @@ a {
 
 /* --- Schedule inside column-row: push to column 2 --- */
 .column-row .schedule {
-  break-before: column;
   break-inside: avoid;
 }
 
@@ -162,7 +162,6 @@ a {
     column-count: 1;
   }
   .column-row .schedule {
-    break-before: auto;
   }
 }
 
@@ -448,7 +447,7 @@ main > p.credit {
     bottom: 0;
     left: 0;
     right: 0;
-    font-size: 7pt;
+    font-size: 9pt;
     text-align: left;
     padding: 3pt 0 0 0;
     color: #333;
