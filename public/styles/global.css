@@ -127,8 +127,6 @@ a {
 
 /* --- Two-column rows --- */
 .column-row {
-  width: 100%;
-  min-width: 0;
   column-count: 2;
   column-gap: 2rem;
   column-fill: balance;
@@ -137,8 +135,6 @@ a {
 
 /* Prevent articles from splitting across columns */
 .article {
-  width: 100%;
-  min-width: 0;
   break-inside: avoid-column;
   margin-bottom: 0.8em;
 }
@@ -186,18 +182,6 @@ a {
   .column-row {
     column-count: 1;
     overflow: hidden;
-  }
-
-  /* Prevent images from overflowing the viewport */
-  .article img {
-    max-width: 100%;
-    height: auto;
-  }
-
-  /* Ensure all content stays within bounds */
-  img {
-    max-width: 100%;
-    height: auto;
   }
 }
 
