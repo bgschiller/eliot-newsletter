@@ -128,7 +128,7 @@ a {
 .column-row {
   column-count: 2;
   column-gap: 2rem;
-  column-fill: auto;
+  column-fill: balance;
   margin-bottom: 1.5rem;
 }
 
@@ -515,7 +515,7 @@ main > p.credit {
   /* Draft watermark — appears on every page in dev or when draft:true */
   body[data-dev="true"]::after,
   body[data-draft="true"]::after {
-    content: "DRAFT";
+    /* content: "DRAFT"; */
     position: fixed;
     top: 50%;
     left: 50%;
