@@ -180,8 +180,19 @@ a {
 @media screen and (max-width: 48rem) {
   .column-row {
     column-count: 1;
+    overflow: hidden;
   }
-  .column-row .schedule {
+
+  /* Prevent images from overflowing the viewport */
+  .article img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Ensure all content stays within bounds */
+  img {
+    max-width: 100%;
+    height: auto;
   }
 }
 
