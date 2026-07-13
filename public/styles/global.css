@@ -138,6 +138,26 @@ a {
   margin-bottom: 0.8em;
 }
 
+.article img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.25em 0;
+}
+
+.poems-side-by-side {
+  display: flex;
+  gap: 1.5em;
+  flex-wrap: wrap;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.poems-side-by-side > div {
+  flex: 1;
+  min-width: 8em;
+}
+
 /* --- Schedule: base visual styles --- */
 .schedule {
   background: var(--color-schedule-bg);
@@ -285,7 +305,7 @@ main > p.credit {
 @media print {
   @page {
     size: 8.5in 14in;
-    margin: 0.2in;
+    margin: 0.6in;
   }
 
   html {
@@ -393,6 +413,9 @@ main > p.credit {
   .events .loc {
     color: black;
   }
+  .events p {
+    font-size: inherit;
+  }
 
   /* Don't grey out events in print */
   .timeslot.past {
@@ -417,9 +440,12 @@ main > p.credit {
   }
 
   /* Body text */
-  main p {
+  main p,
+  main li {
     font-size: var(--print-body-size, 11pt);
-    margin-bottom: 0;
+  }
+  main p {
+    margin-bottom: 4pt;
     orphans: 3;
     widows: 3;
   }
@@ -436,6 +462,14 @@ main > p.credit {
     margin-bottom: 6pt;
   }
 
+  /* Images: fit within column */
+  .article img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 3pt 0;
+  }
+
   /* Hide URL printing */
   a[href]::after {
     content: none !important;
@@ -447,7 +481,7 @@ main > p.credit {
     bottom: 0;
     left: 0;
     right: 0;
-    font-size: 9pt;
+    font-size: 12pt;
     text-align: left;
     padding: 3pt 0 0 0;
     color: #333;
