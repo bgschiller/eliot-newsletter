@@ -307,7 +307,7 @@ main > p.credit {
 @media print {
   @page {
     size: 8.5in 14in;
-    margin: 0.6in;
+    margin: 0.2in;
   }
 
   html {
@@ -483,7 +483,7 @@ main > p.credit {
     bottom: 0;
     left: 0;
     right: 0;
-    font-size: 12pt;
+    font-size: 10pt;
     text-align: left;
     padding: 3pt 0 0 0;
     color: #333;
