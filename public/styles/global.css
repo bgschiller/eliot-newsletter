@@ -136,6 +136,7 @@ a {
 /* Prevent articles from splitting across columns */
 .article {
   width: 100%;
+  contain: inline-size;
   break-inside: avoid-column;
   margin-bottom: 0.8em;
 }
