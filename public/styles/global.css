@@ -129,7 +129,7 @@ a {
 .column-row {
   column-count: 2;
   column-gap: 2rem;
-  column-fill: balance;
+  column-fill: balance; /* balance */
   margin-bottom: 1.5rem;
 }
 
@@ -307,7 +307,7 @@ main > p.credit {
 @media print {
   @page {
     size: 8.5in 14in;
-    margin: 0.2in;
+    margin: 0.6in;
   }
 
   html {
