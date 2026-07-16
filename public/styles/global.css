@@ -307,7 +307,7 @@ main > p.credit {
 @media print {
   @page {
     size: 8.5in 14in;
-    margin: 0.6in;
+    margin: 0.2in;
   }
 
   html {
