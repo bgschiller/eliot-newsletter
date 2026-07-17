@@ -1,21 +1,29 @@
-import Schedule from "../components/Schedule.astro"
-import Timeslot from "../components/Timeslot.astro"
+import Schedule from "../components/Schedule.astro";
+import Timeslot from "../components/Timeslot.astro";
 
 <Schedule type="early" day="tomorrow">
-<h2>Saturday, July 18</h2>
+  <h2>Saturday, July 18</h2>
   <Timeslot start="7">
-    <li>Polar Bear Swim <span class="loc">Swim Dock, to 7:15</span></li>
+    <li>
+      Polar Bear Swim <span class="loc">Swim Dock, to 7:15</span>
+    </li>
   </Timeslot>
   <Timeslot start="8">
-    <li>Pack and Clean Up <span class="loc">respective, to 10:00</span></li>
+    <li>
+      Pack and Clean Up <span class="loc">to 10</span>
+    </li>
   </Timeslot>
   <Timeslot start="8:15" bold>
-    <li>Breakfast <span class="loc">Inn, to 10:15</span></li>
+    <li>
+      Breakfast <span class="loc">Inn, to 10:15</span>
+    </li>
   </Timeslot>
   <Timeslot start="10:30">
-    <li>Closing Gathering <span class="loc">Meeting House, to 11:00</span></li>
+    <li>
+      Closing Gathering <span class="loc">Meeting House, to 11</span>
+    </li>
   </Timeslot>
-  <Timeslot start="11:30">
-    <li>Cross the Bridge!</li>
+  <Timeslot start="12">
+    <li>Cross the Bridge! (Everyone off campus)</li>
   </Timeslot>
 </Schedule>

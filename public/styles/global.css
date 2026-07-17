@@ -129,7 +129,7 @@ a {
 .column-row {
   column-count: 2;
   column-gap: 2rem;
-  column-fill: balance; /* balance */
+  column-fill: auto; /* balance */
   margin-bottom: 1.5rem;
 }
 
