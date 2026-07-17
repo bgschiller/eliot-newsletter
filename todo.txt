@@ -1,3 +1,4 @@
 1. encapsulate page-dependent vars: page margins, column-fill
 2. define schedule in data, pull full day when possible (variable)
 3. Better component for schedule
+4. Publish new schedule at the correct time, not just when convenient

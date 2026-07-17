@@ -129,7 +129,7 @@ a {
 .column-row {
   column-count: 2;
   column-gap: 2rem;
-  column-fill: auto; /* balance */
+  column-fill: balance; /* balance */
   margin-bottom: 1.5rem;
 }
 
@@ -156,7 +156,7 @@ a {
   margin-bottom: 1rem;
 }
 
-.poems-side-by-side > div {
+.poems-side-by-side > * {
   flex: 1;
   min-width: 8em;
 }
