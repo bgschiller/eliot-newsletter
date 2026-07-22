@@ -2,3 +2,5 @@
 2. define schedule in data, pull full day when possible (variable)
 3. Better component for schedule
 4. Publish new schedule at the correct time, not just when convenient
+5. Publish whole schedule, somehow marking that it's provisional
+6. Allow schedule items to link to the blurb written about them
